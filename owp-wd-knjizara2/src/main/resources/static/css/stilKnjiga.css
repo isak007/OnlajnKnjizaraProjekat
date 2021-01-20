@@ -1,0 +1,319 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-image: url('../images/pozadina.jpg');
+    height: 100vh;
+    background-size: cover;
+}
+
+#container{
+    width: 750px;
+    margin: 0 auto;
+}
+
+#cena{
+    border: 1px solid white;
+    border-radius: 2px;
+}
+
+#brojPrimeraka{
+    color: white;
+    font-size: 15px;
+}
+
+#listaZeljaIcon{
+    margin-left: 10px;
+    width: 25px;
+    height: 25px;
+    background-color: white;
+    padding: 2px;
+    border-radius: 50%;
+    opacity: 0.8;
+    cursor: pointer;
+    float: left;
+}
+
+#listaZeljaIcon:hover{
+    opacity: 1.0;
+}
+
+header{
+    width: 665px;
+    height: 220px;
+    background-image: url('../images/header.jpg');
+    background-size: cover;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    padding: 0px 32px 16px;
+    border-radius: 0 0 10px 10px;
+}
+
+h1{
+    font-family: 'Lobster', cursive;
+    float: left;
+    font-size: 60px;
+    color: white;
+    width: 50%;
+    display: inline-block;
+}
+
+header nav ul{
+    list-style: none;
+    display: inline-block;
+    width: 49%;
+    margin-top: 25px;
+}
+
+header nav ul li{
+    margin-left: 10px;
+    display: inline-block;
+    float: right;
+  	background-color: rgba(0, 0, 0, 0);
+}
+
+header nav ul li a{
+    text-decoration: none;
+    font-family: 'Open Sans Condensed', sans-serif;
+}
+
+header nav ul li a img{
+    width: 45px;
+    height: 45px;
+    background-color: white;
+    padding :  7px;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+
+
+header nav ul li a img:hover{
+    opacity: 1.0;
+}
+
+main{
+	width: 100%;
+	overflow: auto;
+	border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+footer{
+    margin: 10px auto;
+}
+
+footer a{
+    opacity: 0.5;
+}
+
+footer a:hover{
+    opacity: 1.0;
+}
+
+.knjiga{
+    overflow: auto;
+    margin: 10px;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    float: left;
+    width: 47%;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+}
+
+.knjiga img{
+    width: 40%;
+    display: inline-block;
+    float: left;
+    margin: auto;
+    width: 100px;
+    height: 150px;
+}
+.naslov{
+    color: white;
+    margin-top: 5px;
+    width: 40%;
+    display: inline-block;
+    margin: auto;
+}
+
+.opis{
+    display: inline-block;
+    float: left;
+    margin-top: 10px;
+    width: 100%;
+}
+.opis textarea{
+    background-color: transparent;
+    font-size: 15px;
+    color: white;
+    width: 100%;
+    height: 160px;
+    resize: none;
+    border-radius: 5px;
+    padding: 2px;
+    border-color: transparent;
+}
+
+.opis #admin{
+    background-color: white;
+    color: black;
+}
+
+.opcije{
+    display: inline-block;
+    float: left;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.opcije button{
+    display: inline-block;
+    width: 35%;
+    padding: 3px 3px;
+    float: left;
+    border-radius: 5px;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.opcije button:hover{
+    opacity: 1.0;
+    color: grey;
+}
+
+.opcije form input{
+    padding: 3px;
+    width: 30%;
+}
+
+.knjigaForm {
+    color: white;
+    float: left;
+    width: 47%;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    display: inline-block;
+    margin: 10px;
+    padding: 15px;
+}
+
+.knjigaForm button{
+    float: right;
+    display: inline-block;
+    width: 30%;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 3px;
+    opacity: 0.8;
+}
+
+.knjigaForm button:hover{
+    opacity: 1.0;
+    color: grey;
+}
+
+
+.knjigaInput {
+    display: inline-block;
+    float: left;
+    width: 50%;
+    border-radius: 3px;
+    border: none;
+    color: black;
+    height: 30px;
+    margin: 10px 0;
+    padding-left: 10px;
+}
+
+
+.polje{
+    width: 100%;
+    display: inline-block;
+    float: left;
+}
+
+.polje b{
+    float: left;
+    display: inline-block;
+    width: 50%;
+    margin: 16px auto;
+}
+
+.polje #chkbox{
+    float: right;
+    width: 48%;
+    height: 100%;
+    display: inline-block;
+}
+
+main h2{
+    color: white;
+    text-align: center;
+    font-family: 'Lobster', cursive;
+    margin-top: 10px;
+}
+
+@media screen and (max-width: 750px) {
+    header { display: none; }
+
+    body{
+        background-size: cover;
+    }
+
+
+    main{
+        width: 100vw;
+        margin: 5px;
+        background-color: rgba(0, 0, 0, 0);
+    }
+    .knjiga{
+        display: block;
+        float: none;
+        width: 90vw;
+        font-size: 15px;
+    }
+
+    .knjigaForm{
+        width: 90vw;
+        font-size: 15px;
+    }
+
+    main h2{
+        text-align: left;
+        margin-left: 5px;
+        width: 90vw;
+    }
+    footer a img{
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    .knjiga{
+        font-size: 10px;
+    }
+
+    .knjiga button{
+        font-size: 5px;
+    }
+
+    .knjigaForm{
+        font-size: 5px;
+    }
+
+    .knjigaInput{
+        font-size: 5px;
+    }
+
+    .knjigaForm button{
+        font-size: 5px;
+    }
+}

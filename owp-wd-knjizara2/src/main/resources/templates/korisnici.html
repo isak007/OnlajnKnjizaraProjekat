@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Korisnici</title>
+    <link rel="stylesheet" href="css/stilKorisnici.css">
+    <script></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+
+		<main>
+
+			<h2>Svi korisnici:</h2>
+			<table>
+				<tr>
+					<th>Korisničko ime</th>
+					<th>Datum registracije</th>
+					<th>Uloga</th>
+					<th>Loyalty Kartica</th>
+				</tr>
+
+				<th:block th:each="itKorisnik, status: ${korisnici.keySet()}">
+					<tr class="linija"/>
+
+					<tr>
+						<td>
+							<a class="korisnickoIme" th:href="|Korisnici/Details?korisnickoIme=${itKorisnik.korisnickoIme}|" th:text="${itKorisnik.korisnickoIme}"/>
+						</td>
+						<td th:text="${#temporals.format(itKorisnik.datumReg, 'dd-MM-yyyy HH:mm')}"></td>
+						<td th:if="${itKorisnik.administrator}==true" th:text="|Administrator|"></td>
+						<td th:if="${itKorisnik.administrator}==false" th:text="|Kupac|"></td>
+						<td th:if="${korisnici.get(itKorisnik)==true}">
+							<a th:href="|Korisnici/Update?korisnickoIme=${itKorisnik.korisnickoIme}&opcija=prihvati|" 
+							class="loyaltyZahtev">Odobri</a>
+							<a th:href="|Korisnici/Update?korisnickoIme=${itKorisnik.korisnickoIme}&opcija=odbij|" 
+							class="loyaltyZahtev" id="odbij">Odbij</a>
+						</td>
+						<td th:if="${itKorisnik.loyaltyKartica}">
+							Poseduje
+						</td>
+					</tr>
+
+
+				</th:block>
+
+			</table>
+		</main>
+
+	</div>
+</body>
+</html>

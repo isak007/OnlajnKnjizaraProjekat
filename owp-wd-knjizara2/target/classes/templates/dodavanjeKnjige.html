@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knjiga</title>
+    <link rel="stylesheet" href="css/stilKnjiga.css">
+    <link rel="stylesheet" href="css/dodavanjeKnjige.css">
+    <script src="webjars/jquery/3.2.1/jquery.min.js"></script>
+    <script src="webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/dodavanjeKnjige.js"></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+		<main>
+			<h2>Dodavanje knjige</h2>
+			<form class="knjigaForm" method="post" action="Knjige/Create">
+				<span class="polje"><b>Naziv</b> <input type="text" name="naziv" class="knjigaInput" /></span>
+				<span class="polje"><b>ISBN</b> <input type="text" name="isbn" class="knjigaInput" /></span>
+				<span class="polje"><b>Izdavacka kuca </b><input name="izdavackaKuca" class="knjigaInput" /></span>
+				<span class="polje"><b>Autor</b> <input type="text" name="autor" class="knjigaInput" /></span>
+				<span class="polje"><b>Kratak opis</b><input type="text" name="kratakOpis" class="knjigaInput" ></input></span>
+				<span class="polje"><b>Godina izdavanja</b> <input type="number" min=1 name="godinaIzdavanja" class="knjigaInput" /></span>
+				<span class="polje"><b>Cena</b> <input type="number" min=0.1 step=0.1 name="cena" class="knjigaInput" /></span>
+				<span class="polje"><b>Broj stranica</b><input type="number" min=1 name="brojStranica" class="knjigaInput" /></span>
+				
+				<span class="polje"><b>Tip poveza</b>
+					<select class="knjigaInput" name="tipPoveza">
+						<option value="tvrdi" th:text="Tvrdi"/>
+				      	<option value="meki" th:text="Meki"/>
+				    </select>
+				</span>
+
+				<span class="polje"><b>Pismo</b>
+					<select class="knjigaInput" name="pismo">
+				      <option value="cirilica" th:text="Cirilica"/>
+				      <option value="latinica" th:text="Latinica"/>
+				    </select>
+				</span>
+				
+				<span class="polje"><b>Zanr</b>
+					<div id="chkbox">
+						<th:block th:each="itZanr, status: ${zanrovi}">
+							<input type="checkbox" name="zanrId" th:value="${itZanr.id}" />
+							<span th:text="${itZanr.naziv}"></span><br>
+						</th:block>
+					</div>
+				</span>
+				
+				<span class="polje"><b>Jezik</b> <input type="text" name="jezik" class="knjigaInput" /></span>
+		
+				<span class="polje"><b>Slika</b> <input type="file" accept="image/png, image/jpeg" name="slika" class="knjigaInput"/></span>
+				<button type="submit">Dodaj</button>
+			</form>
+
+		</main>
+	</div>
+
+	
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Korisnik</title>
+    <link rel="stylesheet" type="text/css" href="css/stilKnjiga.css"/>
+    <link rel="stylesheet" type="text/css" href="css/stilKorisnik.css"/>
+	<link rel="stylesheet" type="text/css" href="css/dodavanjeKnjige.css"/>
+	<script src="webjars/jquery/3.2.1/jquery.min.js"></script>
+    <script src="webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/korisnik.js"></script>
+    <script src="js/licniPodaci.js"></script>
+</head>
+<body>
+	<div th:fragment="centralniDiv">
+
+		<main>
+			<h2 th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.korisnickoIme == korisnik.korisnickoIme}"
+			th:text="|Vaš profil|"></h2>
+
+			<h2 th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.korisnickoIme != korisnik.korisnickoIme and session.prijavljeniKorisnik.administrator}"
+			th:text="|Detaljnije o korisniku: ${korisnik.korisnickoIme}|"></h2>
+			
+			<h2 th:if="${kupovine != null}" th:text="Kupovine"></h2>
+			<div th:if="${kupovine != null}" class="kupovine-overflow">
+				<table>
+					<tr>
+						<th>Broj knjiga</th>
+						<th>Ukupna cena</th>
+						<th>Vreme kupovine</th>
+					</tr>
+					
+					<th:block th:each="kupovina, status: ${kupovine}">
+						<tr class="linija"/>
+						<tr>
+							<td th:text="${kupovina.brojKupljenihKnjiga}"/>
+							<td th:text="|${kupovina.ukupnaCena} din|"/>
+							<td>
+								<a th:href="|Kupovina/Details?id=${kupovina.id}|" th:text="${#temporals.format(kupovina.datumKupovine, 'dd-MM-yyyy HH:mm')}"/>
+							</td>
+						</tr>
+					</th:block>
+				</table>
+			</div>
+
+			<h2 th:if="${session.prijavljeniKorisnik != null and not korisnik.administrator and listaZelja != null}"
+			th:text="|Lista zelja|"></h2>
+			<div id="listaZelja-overflow" th:if="${session.prijavljeniKorisnik != null and not korisnik.administrator and listaZelja != null}">
+				<table id="listaZelja" >
+					<tr>
+						<th>Slika</th>
+						<th>Naziv</th>
+						<th>Cena</th>
+						<th>Ukloni</th>
+					</tr>
+
+					<th:block th:each="itKnjiga, status: ${listaZelja}">
+						<tr class="linija"/>
+						<tr>
+							<td>
+								<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|">
+									<img th:src="|@{/}/images/${itKnjiga.slika}|" alt="Knjiga1"/>
+								</a>
+							</td>
+							<td><a id="knjigaNaziv" th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|" th:text="${itKnjiga.naziv}"></a></td>
+							<td th:text="|${itKnjiga.cena} din|"/>
+							<td class="ukloni">
+								<a name="knjigaISBN" value="${itKnjiga.ISBN}" th:href="|@{/ListaZelja/Remove}?isbn=${itKnjiga.ISBN}|">
+									<img id="ukloni" src="images/x.png" alt="ukloni"/>
+								</a>
+							</td>
+						</tr>
+					</th:block>
+				</table>
+			</div>
+
+
+			<a th:if="${session.prijavljeniKorisnik != null and not korisnik.administrator and listaZelja != null}"
+				id="licniPodaci" value="prikazi">
+				Prikazi licne podatke
+			</a>
+			<a th:if="${session.prijavljeniKorisnik != null and listaZelja == null}"
+				id="licniPodaci" value="sakrij">
+				Sakrij licne podatke
+			</a>
+			<h2 id="updateLabel">Licni podaci</h2>
+			<form id="update" th:action="@{Korisnici/Edit}" method="post" class="knjigaForm">
+				<span class="polje"><b>Korisnicko ime</b> <input type="text" th:value="${korisnik.korisnickoIme}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Email</b> <input type="text" th:value="${korisnik.eMail}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Ime </b><input th:value="${korisnik.ime}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Prezime</b> <input type="text" th:value="${korisnik.prezime}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Adresa</b><input type="text" th:value="${korisnik.adresa}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Broj telefona</b> <input type="text" th:value="${korisnik.brTel}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Datum rodjenja</b> <input type="date" th:value="${korisnik.datumRodjenja}" class="knjigaInput" disabled/></span>
+				<span class="polje"><b>Lozinka</b> <input type="text" class="knjigaInput" th:value="${korisnik.lozinka}" disabled/></span>
+				<br/>
+				
+				<th:block th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.korisnickoIme != korisnik.korisnickoIme and session.prijavljeniKorisnik.administrator}">
+					<span class="polje"><b>Uloga</b>
+						<select class="knjigaInput" name="uloga">
+							<option th:selected="${korisnik.administrator} == false" value="kupac" th:text="Kupac"/>
+					      	<option th:selected="${korisnik.administrator} == true" value="admin" th:text="Admin"/>
+					    </select>
+					</span>
+					<input type="hidden" name="korisnickoIme" th:value="${korisnik.korisnickoIme}"/>
+					<button th:if="${not korisnik.blokiran}" type="submit" name="button" id="izmeni" value="izmeniUlogu">Izmeni ulogu</button>
+					<button th:if="${not korisnik.administrator and not korisnik.blokiran}" type="submit" id="blokiraj" name="button" value="blokiraj">Blokiraj korisnika</button>
+					<button th:if="${not korisnik.administrator and korisnik.blokiran}" type="submit" name="button" value="odblokiraj">Odblokiraj korisnika</button>
+				</th:block>
+
+				<th:block th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator == false and
+				session.prijavljeniKorisnik.loyaltyKartica == false and zahtevPodnesen == null}">
+					<input type="hidden" name="korisnickoIme" th:value="${korisnik.korisnickoIme}"/>
+					<button type="submit" name="button" value="zahtevZaLK">Posalji zahtev za Loyalty Karticu</button>
+				</th:block>
+			</form>
+
+		</main>
+
+		<p class="greska" th:text="${poruka}"></p>
+	</div>
+</body>
+</html>

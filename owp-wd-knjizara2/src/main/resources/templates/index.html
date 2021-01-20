@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knjizara Putnik</title>
+    <link rel="stylesheet" href="css/stil.css">
+    <link rel="stylesheet" href="css/tabela.css">
+    <script></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+		<form method="get" th:action="|Knjige|">
+			<table class="tabela">
+				<caption>Pretraga</caption>
+				<tr>
+					<th th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}" th:text="|ISBN|"></th>
+					<th>Naziv</th>
+					<th>Zanr</th>
+					<th>Cena</th>
+					<th>Autor</th>
+					<th>Jezik</th>
+					<th>Sortiraj</th>
+					<th></th>
+				</tr>
+				<tr>
+					
+					<td  id="ISBN" th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+						<input maxlength="13" type="search" name="isbn" th:value="${param.isbn}?: null"/>
+					</td>
+
+					<td><input type="search" name="naziv" th:value="${param.naziv}?: null"/></td>
+
+					<td>
+						<select name="zanrId">
+							<option value="">-</option>
+							<option th:each="itZanr: ${zanrovi}" th:value="${itZanr.id}" th:text="${itZanr.naziv}" th:selected="${#strings.equals(itZanr.id, param.zanrId)}"></option>
+						</select>
+					</td>
+
+					<td>
+						od: <input class="cena" type="number" min="0" th:value="${param.cenaMin}?: null" name="cenaMin"/><br/>
+						do: <input class="cena" type="number" min="0" th:value="${param.cenaMax}?: null" name="cenaMax"/>
+					</td>
+					
+					<td><input type="search" name="autor" th:value="${param.autor}?: null"/></td>
+					<td><input type="search" name="jezik" th:value="${param.jezik}?: null"/></td>
+					<td>
+						<select name="sortiranje">
+							<option value="">-</option>
+							<option value="poNazivu" th:selected="${#strings.equals('poNazivu', param.sortiranje)}">po nazivu</option>
+							<option value="poZanru" th:selected="${#strings.equals('poZanru', param.sortiranje)}">po broju zanra</option>
+							<option value="poCeni" th:selected="${#strings.equals('poCeni', param.sortiranje)}">po ceni</option>
+							<option value="poAutoru" th:selected="${#strings.equals('poAutoru', param.sortiranje)}">po autoru</option>
+							<option value="poJeziku" th:selected="${#strings.equals('poJeziku', param.sortiranje)}">po jeziku</option>
+							<option value="poOceni" th:selected="${#strings.equals('poOceni', param.sortiranje)}">po oceni</option>
+						</select>
+						<select name="poredak">
+							<option class="cena" value="rastuci" th:selected="${#strings.equals('rastuci', param.poredak)}">rastuce</option>
+							<option class="cena" value="opadajuci" th:selected="${#strings.equals('opadajuci', param.poredak)}">opadajuce</option>
+						</select>
+					</td>
+					<td><input type="submit" value="Pretraži"/></td>
+				</tr>
+			</table>
+		</form>
+
+		<form method="get" th:action="|Knjige/Create|" th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+			<button type="submit">Dodaj knjigu</button>
+		</form>
+		
+		<div class="knjige-overflow">
+			<h2>Trenutno u ponudi</h2>
+			<div th:each="itKnjiga, status: ${knjige}">
+				<div class="knjiga">
+					<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|"><img th:src="|@{/}/images/${itKnjiga.slika}|" alt="Knjiga1"/></a>
+					<div class="naslov">
+						<strong th:text="${itKnjiga.naziv}"></strong><br>
+						<small th:text="${itKnjiga.autor}"></small>
+						<br>
+						<br>
+						<div id="cena"><i>Cena: <span th:text="|${itKnjiga.cena} din|"/></i></div>
+					</div>
+					
+					<div class="opis">
+						<textarea th:value="${itKnjiga.kratakOpis}" th:text="${itKnjiga.kratakOpis}" disabled></textarea>
+					</div>
+					
+					<div class="opcije">
+						<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|" th:text="|Saznaj vise|"></a>
+						<form method="get" th:action="|Korpa/Add|" th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+							<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
+							<button type="submit">Dodaj</button>
+						</form>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		
+	</div>
+
+	
+</body>
+</html>
+

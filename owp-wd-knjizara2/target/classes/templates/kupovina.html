@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kupovina</title>
+    <link rel="stylesheet" type="text/css" href="css/stilKnjiga.css"/>
+    <link rel="stylesheet" type="text/css" href="css/stilKupovina.css"/>
+	<script src="webjars/jquery/3.2.1/jquery.min.js"></script>
+    <script src="webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+</head>
+
+<body>
+
+
+	<div th:fragment="centralniDiv">
+		<main>
+			<div class="podaci" th:text="|Kupac: ${kupovina.kupac.korisnickoIme}|"></div>
+			<div class="podaci" th:text="|Vreme kupovine: ${#temporals.format(kupovina.datumKupovine, 'dd-MM-yyyy HH:mm')}|"></div>
+			<div class="podaci" th:text="|Ukupna cena: ${kupovina.ukupnaCena} din|"></div>
+
+			<h2>Kupljene knjige</h2>
+			<div id="knjige-overflow">
+				<table id="listaZelja" >
+					<tr>
+						<th>Slika</th>
+						<th>Naziv</th>
+						<th>Broj primeraka</th>
+					</tr>
+
+					<th:block th:each="kk, status: ${kupljeneKnjige}">
+						<tr class="linija"/>
+							<tr>
+								<td>
+									<a th:href="|Knjige/Details?isbn=${kk.knjiga.ISBN}|">
+										<img th:src="|@{/}/images/${kk.knjiga.slika}|" alt="Knjiga1"/>
+									</a>
+								</td>
+								<td><a id="knjigaNaziv" th:href="|Knjige/Details?isbn=${kk.knjiga.ISBN}|" th:text="${kk.knjiga.naziv}"></a></td>
+								<td th:text="${kk.brojPrimeraka}"/>
+							</tr>
+					</th:block>
+
+				</table>
+			</div>
+
+		</main>
+	</td>
+
+
+</body>
+</html>

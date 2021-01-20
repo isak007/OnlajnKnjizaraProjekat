@@ -1,0 +1,73 @@
+main table{
+    overflow-y: scroll;
+	width: 95%;
+    margin: auto;
+}
+
+main table tr{
+	margin: 10px 15px;
+	padding: 5px;
+	float: left;
+	display: inline-block;
+	width: 100%;
+}
+
+main table th{
+    font-size: 20px;
+	font-family: 'Lobster', cursive;
+	width: 32%;
+	display: inline-block;
+	float: left;
+	text-align: left;
+	margin-left: 5px;
+}
+
+main table td{
+	width: 32%;
+	display: inline-block;
+	float: left;
+	margin-left: 5px;
+}
+
+main table td a{
+	color: black;
+	display: inline-block;
+	float: left;
+    cursor: pointer;
+}
+
+
+main table td a:hover{
+	color: skyblue;
+}
+
+main table .linija{
+    border: 1px solid grey;
+    padding: 0;
+    width: 100%;
+    margin: 5px auto;
+}
+
+h2{
+	margin-top: 20px;
+	color: black;
+}
+
+#knjige-overflow{
+	color: black;
+    background-color: rgba(255,255,255,0.9);
+    overflow-y: scroll;
+    height: 50vh;
+    border: 1px solid black;
+    margin: 50px;
+    margin-top: 5px;
+    border-radius: 5px;
+}
+
+.podaci{
+	overflow-y: hidden;
+	margin: 20px 50px;
+	padding: 20px;
+	background-color: white;
+	border-radius: 10px;
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Korpa</title>
+    <link rel="stylesheet" href="css/stilKorpa.css">
+    <script src="webjars/jquery/3.2.1/jquery.min.js"></script>
+    <script src="webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/korpa.js"></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+
+		<main>
+
+			<h2 th:if="${knjige.size() > 0}">Vaša korpa</h2>
+			<h2 th:unless="${knjige.size() > 0}">Vaša korpa je prazna</h2>
+			
+			<div th:if="${knjige.size() > 0}" class="knjige-overflow">
+				<table th:if="${knjige.size() > 0}">
+
+					<tr>
+						<th class="ukloni" th:text="|-|"></th>
+						<th>Broj primeraka</th>
+						<th>Cena</th>
+						<th>Autor</th>
+						<th>Naziv</th>
+						<th></th>
+					</tr>
+					<tr class="linija"/>
+
+					
+					<th:block th:each="knjiga, status: ${knjige.keySet()}">
+
+						<tr>
+
+							<td class="ukloni">
+								<a class="ukloni" name="knjigaISBN" value="${knjiga.ISBN}" th:href="|@{/Korpa/Remove}?isbn=${knjiga.ISBN}|">
+									<img src="images/x.png" alt="ukloni"/>
+								</a>
+							</td>
+
+							<td>
+								<form method="get" action="Korpa/Update">
+									<input type="hidden" name="knjigaISBN" th:value="${knjiga.ISBN}">		
+									<select id="brojKnjiga" name="brojKnjiga">
+								      <option th:selected="${knjige.get(knjiga) == 1}" value=1>1</option>
+								      <option th:selected="${knjige.get(knjiga) == 2}" value=2>2</option>
+								      <option th:selected="${knjige.get(knjiga) == 3}" value=3>3</option>
+								      <option th:selected="${knjige.get(knjiga) == 4}" value=4>4</option>
+								      <option th:selected="${knjige.get(knjiga) == 5}" value=5>5</option>
+								      <option th:if="${knjige.get(knjiga) > 5}" selected="selected" th:text="${knjige.get(knjiga)}"></option> 
+								    </select>
+								    <a id="update"><button type="submit">Azuriraj</button></a>
+								</form>
+							</td>
+							
+							<td><span th:text="|${knjiga.cena} din|"></span></td>
+							<td th:text="${knjiga.autor}"></td>	
+							<td><a th:href="|Knjige/Details?isbn=${knjiga.ISBN}|" th:text="${knjiga.naziv}"></a></td>	
+							<td class="slika"><a th:href="|Knjige/Details?isbn=${knjiga.ISBN}|"><img id="slika" th:src="|@{/}/images/${knjiga.slika}|"/></a></td>
+						</tr>
+						<tr class="linija"/>
+						
+					</th:block>
+
+					<tr>
+						<td id="ukupnaCena" th:text="|Ukupna cena: ${ukupnaCena} din|"/>
+						<td id="loyaltyKartica">
+							<div th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.loyaltyKartica}">
+								<span th:text="|Broj dostupnih poena: ${loyaltyKartica.brojPoena}|"/>
+								<br>
+								<th:block th:if="${loyaltyKartica.brojPoena > 10}">
+									<input form="placanjeForm" name="brojPoena" type="hidden" th:value="${param.brojPoena?:0}"/>
+									<input form="azuriranjeForm" name="brojPoena" type="number" min="0" max="10" th:value="${param.brojPoena?:0}"/>
+								</th:block>
+								<th:block th:unless="${loyaltyKartica.brojPoena > 10}">
+									<input form="placanjeForm" name="brojPoena" type="hidden" th:value="${param.brojPoena?:0}"/>
+									<input form="azuriranjeForm" name="brojPoena" type="number" min="0" th:max="${loyaltyKartica.brojPoena}" th:value="${param.brojPoena?:0}"/>
+								</th:block>
+								
+							</div>				
+						</td>
+					</tr>
+				</table>
+			</div>
+			<form th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.loyaltyKartica and knjige.size() > 0}"
+			id="azuriranjeForm" method="get" action="Korpa/Update">
+				<button id="azuriraj" type="submit">Azuriraj poene</button>
+			</form>
+			<form id="placanjeForm" th:if="${knjige.size() > 0}" method="post" action="Kupovina/Create">
+				<button type="submit">Plaćanje</button>
+			</form>
+		</main>
+	</div>
+</body>
+</html>

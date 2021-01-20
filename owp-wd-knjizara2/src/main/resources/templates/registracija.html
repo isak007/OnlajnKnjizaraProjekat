@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="stylesheet" type="text/css" href="css/stilKnjiga.css"/>
+	<link rel="stylesheet" type="text/css" href="css/dodavanjeKnjige.css"/>
+	<title>Registracija</title>
+	<script src="webjars/jquery/3.2.1/jquery.min.js"></script>
+    <script src="webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/registracija.js"></script>
+</head>
+<body>
+	<div th:fragment="centralniDiv">
+
+		<main>
+			<h2>Registracija</h2>
+			<form class="knjigaForm" method="post" action="Korisnici/Register">
+				<span class="polje"><b>Korisnicko ime</b> <input type="text" name="korisnickoIme" th:value="${param.korisnickoIme}" class="knjigaInput" /></span>
+				<span class="polje"><b>Email</b> <input type="text" name="eMail" th:value="${param.eMail}" class="knjigaInput" /></span>
+				<span class="polje"><b>Ime </b><input name="ime" th:value="${param.ime}" class="knjigaInput" /></span>
+				<span class="polje"><b>Prezime</b> <input type="text" name="prezime" th:value="${param.prezime}" class="knjigaInput" /></span>
+				<span class="polje"><b>Adresa</b><input type="text" name="adresa" th:value="${param.adresa}" class="knjigaInput" ></input></span>
+				<span class="polje"><b>Broj telefona</b> <input type="text" name="brTel" th:value="${param.brTel}" class="knjigaInput" /></span>
+				<span class="polje"><b>Datum rodjenja</b> <input type="date" name="datum" th:value="${param.datum}" class="knjigaInput" /></span>
+				<span class="polje"><b>Lozinka</b> <input type="password" name="lozinka" class="knjigaInput" /></span>
+				<span class="polje"><b>Ponovljena lozinka</b> <input type="password" name="ponovljenaLozinka" class="knjigaInput" /></span>
+				<button type="submit">Registruj se!</button>
+			</form>
+
+		</main>
+
+		<p class="greska" th:text="${poruka}"></p>
+	</div>
+</body>
+</html>

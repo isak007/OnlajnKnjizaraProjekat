@@ -1,0 +1,41 @@
+table.tabela {
+	background-color: rgba(0, 0, 0, 0.5);
+	border-collapse: collapse;
+	font-family: 'Lobster', cursive;
+	border-radius: 5px;
+}
+
+table.tabela caption {
+	border-radius: 5px;
+	color: white;
+	font-size: 16pt;
+	text-align: center;
+	font-family: 'Lobster', cursive;
+	background-color: rgba(135, 220, 255, 0.8);
+}
+
+table.tabela tr th {
+	padding: 5px;
+	font-family: 'Lobster', cursive;
+	color: white;
+}
+
+table.tabela tr td {
+	text-align: center;
+	font-family: 'Lobster', cursive;
+	color: white;
+	padding: 5px;
+}
+
+table.tabela input[type="search"] {
+	width: 100%;
+	padding: 2px;
+}
+
+.cena{
+	width: 50%;
+}
+
+#ISBN{
+	width: 14%;
+}

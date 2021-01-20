@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="stylesheet" type="text/css" href="css/stilKnjiga.css"/>
+	<link rel="stylesheet" type="text/css" href="css/dodavanjeKnjige.css"/>
+	<title>Prijava</title>
+	<script src="webjars/jquery/3.2.1/jquery.min.js"></script>
+    <script src="webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/prijava.js"></script>
+</head>
+<body>
+	<div th:fragment="centralniDiv">
+		<main>
+			<h2>Prijava</h2>
+			<form class="knjigaForm" method="post" action="Korisnici/Login">
+				<span class="polje"><b>Korisnicko ime</b> <input type="text" name="korisnickoIme" class="knjigaInput" /></span>
+				<span class="polje"><b>Lozinka</b> <input type="password" name="lozinka" class="knjigaInput" /></span>
+
+				<button type="submit">Prijavi se</button>
+			</form>
+
+		</main>
+		<p class="greska" th:text="${poruka}"></p>
+	</div>
+</body>
+</html>

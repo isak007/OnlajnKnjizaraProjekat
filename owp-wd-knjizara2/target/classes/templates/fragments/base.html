@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html th:fragment="layout(title, links, scripts, content)" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+	<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+	<META HTTP-EQUIV="Expires" CONTENT="0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base th:href="@{/}"><!-- popuni href atribut vrednošću context path-a -->
+    <title th:replace="${title}"></title>
+    <link rel="stylesheet" href="css/registracijaPrijava.css">
+    <th:block th:replace="${links}"/>
+    <th:block th:replace="${scripts}"/>
+</head>
+
+<body>
+
+
+	<div id="fixed">
+		<table class="korisnik" th:unless="${session.prijavljeniKorisnik == null}">
+			<tr><th>Prijavljeni ste kao,</th>
+				<td><a id="korIme" th:href="|Korisnici/Details?korisnickoIme=${session.prijavljeniKorisnik.korisnickoIme}|" th:text="${session.prijavljeniKorisnik.korisnickoIme}"></a></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<ul>
+						<li th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}"><a href="Korisnici">Svi korisnici</a></li>
+						<br>
+						<li><a href="Korisnici/Logout">Odjava</a></li>	
+					</ul>
+				</td>
+			</tr>
+		</table>
+
+		<table class="korisnik" th:if="${session.prijavljeniKorisnik == null}">
+			<tr><th>Niste prijavljeni</th></tr>
+			<tr>
+				<td>
+					<ul>
+						<li><a th:href="|Korisnici/Register|">Registracija</a></li>
+						<li><a th:href="|Korisnici/Login|">Prijava</a></li>
+					</ul>
+				</td>
+			</tr>
+		</table>
+
+	</div>
+
+	<div id="container">
+		<header>
+			<h1>Knjižara Putnik</h1>
+			<nav>
+				<ul>
+					<li>
+						<a th:href="@{/}"><img src="images/home3.png" alt="Pocetna"/></a>
+					</li>
+					<li>
+						<a th:href="@{/Korpa}" th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}"><img src="images/korpa.png" alt="Korpa"/></a>
+					</li>
+					<li>
+						<a th:href="|Korisnici/Details?korisnickoIme=${session.prijavljeniKorisnik.korisnickoIme}|" th:if="${session.prijavljeniKorisnik != null}"><img src="images/user.png" alt="Korisnik"/></a>
+					</li>
+				</ul>
+			</nav>
+		</header>
+
+
+		<div th:replace="${content}"></div>
+
+
+		<footer>
+			<a href="https://www.twitter.com"><img src="images/twitter.png" alt="Twitter"/></a>
+			<a href="https://www.facebook.com"><img src="images/facebook.png" alt="Facebook"/></a>
+			<a href="https://www.plus.google.com"><img src="images/gplus.png" alt="Google plus"/></a>
+		</footer>
+	</div>
+
+	
+</body>
+</html>

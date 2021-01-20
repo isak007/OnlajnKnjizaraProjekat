@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knjiga</title>
+    <link rel="stylesheet" href="css/stilKnjiga.css">
+    <script></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+		<main>
+			<h2>Detaljnije o knjizi:</h2>
+			<div class="knjiga">
+				<img th:src="|@{/}/images/${knjiga.slika}|" alt="Knjiga1"/>
+				<div class="naslov">
+					<strong th:text="${knjiga.naziv}"></strong><br>
+					<small th:text="${knjiga.autor}"></small>
+					<br>
+					<br>
+					<div id="cena"><i>Cena: <span th:text="|${knjiga.cena} din|"/></i></div>
+				</div>
+				
+				<div class="opis">
+					<th:block th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+						<textarea maxlength="450" id="admin" form="form" name="kratakOpis" th:value="${knjiga.kratakOpis}" th:text="${knjiga.kratakOpis}"></textarea>
+					</th:block>
+					<th:block  th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+						<textarea name="kratakOpis" th:value="${knjiga.kratakOpis}" th:text="${knjiga.kratakOpis}" disabled></textarea>
+					</th:block>
+				</div>
+				<div th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}"
+				id="brojPrimeraka" th:text="|Broj primeraka: ${brojPrimeraka}|"></div>
+
+				<div class="opcije">
+					<form method="post" th:action="@{/Knjige/Porucivanje}" th:if="${session.prijavljeniKorisnik != null and
+					session.prijavljeniKorisnik.administrator}">
+						<input type="hidden" name="isbn" th:value="${knjiga.ISBN}"/>
+						<input type="number" name="brPrimerakaZaPorucivanje"/>
+						<button type="submit">Poruci</button>
+					</form>
+
+					<form method="get" th:action="|Korpa/Add|" th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+						<input type="hidden" name="isbn" th:value=${knjiga.ISBN}>
+						<button type="submit">Dodaj u korpu</button>
+					</form>
+
+					<form method="post" th:action="@{ListaZelja/Add}"
+					 th:if="${session.prijavljeniKorisnik != null and not session.prijavljeniKorisnik.administrator}">
+					 	<input type="hidden" name="isbn" th:value=${knjiga.ISBN}>
+						<input type="image" name="submit" id="listaZeljaIcon" src="images/listaZelja.png" alt="ukloni"/>
+					</form>
+				</div>
+			</div>
+
+			<form id="form" class="knjigaForm" method="post" action="Knjige/Edit" th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+				<input type="hidden" name="isbn" th:value="${knjiga.ISBN}"/>
+				<span class="polje"><b>Naziv</b> <input type="text" name="naziv" class="knjigaInput" th:value="${knjiga.naziv}" /></span>
+				<span class="polje"><b>ISBN</b> <input type="text" class="knjigaInput" th:value="${knjiga.ISBN}" disabled/></span>
+				<span class="polje"><b>Izdavacka kuca </b><input name="izdavackaKuca" class="knjigaInput" th:value="${knjiga.izdavackaKuca}" /></span>
+				<span class="polje"><b>Autor</b> <input type="text" name="autor" class="knjigaInput" th:value="${knjiga.autor}" /></span>
+				<span class="polje"><b>Godina izdavanja</b> <input type="number" min=1 name="godinaIzdavanja" class="knjigaInput" th:value="${knjiga.godinaIzdavanja}" /></span>
+				<span class="polje"><b>Cena</b> <input type="number" min=0.1 step=0.1 name="cena" class="knjigaInput" th:value="${knjiga.cena}" /></span>
+				<span class="polje"><b>Broj stranica</b><input type="number" min=1 name="brojStranica" class="knjigaInput" th:value="${knjiga.brojStranica}" /></span>
+				
+				<span class="polje"><b>Tip poveza</b>
+					<select class="knjigaInput" name="tipPoveza">
+						<option th:selected="${#strings.contains(knjiga.tipPoveza, 'tvrdi')}" value="tvrdi" th:text="Tvrdi"/>
+				      	<option th:selected="${#strings.contains(knjiga.tipPoveza, 'meki')}" value="meki" th:text="Meki"/>
+				    </select>
+				</span>
+
+				<span class="polje"><b>Pismo</b>
+					<select class="knjigaInput" name="pismo">
+				      <option th:selected="${#strings.contains(knjiga.pismo, 'cirilica')}" value="cirilica" th:text="Cirilica"/>
+				      <option th:selected="${#strings.contains(knjiga.pismo, 'latinica')}" value="latinica" th:text="Latinica"/>
+				    </select>
+				</span>
+				
+				<span class="polje"><b>Zanr</b>
+					<div id="chkbox">
+						<th:block th:each="itZanr, status: ${zanrovi}">
+							<input type="checkbox" name="zanrId" th:value="${itZanr.id}" th:checked="${#lists.contains(knjigaZanroviIds, itZanr.id)}"/>
+							<span th:text="${itZanr.naziv}"></span><br>
+						</th:block>
+					</div>
+				</span>
+				
+				<span class="polje"><b>Jezik</b> <input type="text" name="jezik" class="knjigaInput" th:value="${knjiga.jezik}" /></span>
+
+				<input type="hidden" name="prosecnaOcena" th:value="${knjiga.prosecnaOcena}"/>
+				<span class="polje"><b>Prosecna ocena knjige</b><input class="knjigaInput" th:value="${knjiga.prosecnaOcena}" disabled/></span>
+				<span class="polje"><b>Slika</b> <input type="file" accept="image/png, image/jpeg" name="slika" class="knjigaInput"/></span>
+				<button type="submit">Izmeni</button>
+			</form>
+
+			
+			<form class="knjigaForm" th:if="${session.prijavljeniKorisnik == null or not session.prijavljeniKorisnik.administrator}">
+				<span class="polje"><b>Naziv</b> <input type="text" name="naziv" class="knjigaInput" th:value="${knjiga.naziv}" disabled/></span>
+				<span class="polje"><b>Izdavacka kuca </b><input name="izdavackaKuca" class="knjigaInput" th:value="${knjiga.izdavackaKuca}" disabled/></span>
+				<span class="polje"><b>Autor</b> <input type="text" name="autor" class="knjigaInput" th:value="${knjiga.autor}" disabled/></span>
+				
+				<span class="polje"><b>Godina izdavanja</b> <input type="number" name="godinaIzdavanja" class="knjigaInput" th:value="${knjiga.godinaIzdavanja}" disabled/></span>
+				<span class="polje"><b>Cena</b> <input type="number" step=0.1 name="cena" class="knjigaInput" th:value="${knjiga.cena}" disabled/></span>
+				<span class="polje"><b>Broj stranica</b><input type="number" name="brojStranica" class="knjigaInput" th:value="${knjiga.brojStranica}" disabled/></span>
+				
+				<span class="polje"><b>Tip poveza</b>
+					<select class="knjigaInput" name="tipPoveza" disabled>
+						<option th:selected="${#strings.contains(knjiga.tipPoveza, 'tvrdi')}" value="tvrdi" th:text="Tvrdi"/>
+				      	<option th:selected="${#strings.contains(knjiga.tipPoveza, 'meki')}" value="meki" th:text="Meki"/>
+				    </select>
+				</span>
+
+				<span class="polje"><b>Pismo</b>
+					<select class="knjigaInput" name="pismo" disabled>
+				      <option th:selected="${#strings.contains(knjiga.pismo, 'cirilica')}" value="cirilica" th:text="Cirilica" />
+				      <option th:selected="${#strings.contains(knjiga.pismo, 'latinica')}" value="latinica" th:text="Latinica" />
+				    </select>
+				</span>
+				
+				<span class="polje"><b>Zanr</b>
+					<div id="chkbox">
+						<th:block th:each="itZanr, status: ${zanrovi}">
+							<input type="checkbox" name="zanrId" th:value="${itZanr.id}" th:checked="${#lists.contains(knjigaZanroviIds, itZanr.id)}" disabled/>
+							<span th:text="${itZanr.naziv}"></span><br>
+						</th:block>
+					</div>
+				</span>
+				
+				<span class="polje"><b>Jezik</b> <input type="text" name="jezik" class="knjigaInput" th:value="${knjiga.jezik}" disabled/></span>
+				<span class="polje"><b>Prosecna ocena knjige</b><input name="prosecnaOcena" class="knjigaInput" th:value="${knjiga.prosecnaOcena}" disabled/></span>
+
+			</form>
+
+
+		</main>
+	</div>
+
+	
+</body>
+</html>
