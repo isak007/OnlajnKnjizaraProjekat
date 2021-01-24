@@ -90,6 +90,13 @@
 					
 					<div class="opcije">
 						<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|" th:text="|Saznaj vise|"></a>
+
+						<form method="post" th:action="@{ListaZelja/Add}"
+						 th:if="${session.prijavljeniKorisnik != null and not session.prijavljeniKorisnik.administrator}">
+						 	<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
+							<input type="image" name="submit" id="listaZeljaIcon" src="images/listaZelja.png" alt="ukloni"/>
+						</form>
+						
 						<form method="get" th:action="|Korpa/Add|" th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
 							<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
 							<button type="submit">Dodaj</button>

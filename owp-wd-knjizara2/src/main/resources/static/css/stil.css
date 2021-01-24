@@ -10,6 +10,22 @@ body {
     height: 100vh;
 }
 
+#listaZeljaIcon{
+    margin-left: 10px;
+    width: 25px;
+    height: 25px;
+    background-color: white;
+    padding: 2px;
+    border-radius: 50%;
+    opacity: 0.8;
+    cursor: pointer;
+    float: left;
+}
+
+#listaZeljaIcon:hover{
+    opacity: 1.0;
+}
+
 #container{
     width: 850px;
     margin: 0 auto;

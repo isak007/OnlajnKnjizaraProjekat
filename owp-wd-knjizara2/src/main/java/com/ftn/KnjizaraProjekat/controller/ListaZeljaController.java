@@ -105,7 +105,7 @@ public class ListaZeljaController implements ServletContextAware {
 		
 		
 		System.out.println(korisnik.getListaZelja());
-		response.sendRedirect(baseURL + "Knjige/Details?isbn=" + isbn);
+		response.sendRedirect(baseURL);
 	}
 	
 	
