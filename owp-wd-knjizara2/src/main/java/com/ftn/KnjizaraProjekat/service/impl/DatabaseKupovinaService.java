@@ -22,13 +22,18 @@ public class DatabaseKupovinaService implements KupovinaService {
 	}
 	
 	@Override
-	public Kupovina findOne(String korisnickoIme) {
-		return kupovinaDAO.findOne(korisnickoIme);
+	public Kupovina findByKupac(Long kupacId) {
+		return kupovinaDAO.findByKupac(kupacId);
 	}
 
 	@Override
 	public List<Kupovina> findAll(String korisnickoIme) {
 		return kupovinaDAO.findAll(korisnickoIme);
+	}
+	
+	@Override
+	public List<Kupovina> findAll() {
+		return kupovinaDAO.findAll();
 	}
 
 	@Override

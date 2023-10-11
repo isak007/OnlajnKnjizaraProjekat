@@ -1,19 +1,7 @@
 $(document).ready(function(){
 	function ukloni(){
 		var potvrda = confirm("Ukloni iz korpe?") 
-		if (potvrda) {
-			var knjigaIsbnObj = $("a[name=knjigaISBN]")
-			var knjigaISBN = knjigaIsbnObj.val()
-			
-			var parametar = {
-				knjigaISBN : knjigaISBN
-			}
-			
-			$.get("Korpa/Remove",knjigaISBN)
-		}
-		else{
-			return false;
-		}
+		if (!potvrda) return false
 	}
 	
 	function azuriraj(){
@@ -23,7 +11,6 @@ $(document).ready(function(){
 		var brojKnjiga = brojKnjigaObj.find("input:checked")
 		var brojPoenaObj = $("input[name=brojPoena]")
 		var brojPoena = brojPoenaObj.val()
-		
 		
 		console.log(knjigaISBN,brojKnjiga)
 		if (brojPoena != null){

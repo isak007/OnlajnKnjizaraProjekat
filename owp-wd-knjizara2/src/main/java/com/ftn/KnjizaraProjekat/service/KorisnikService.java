@@ -11,6 +11,7 @@ public interface KorisnikService {
 
 	Korisnik findOne(String korisnickoIme);
 	Korisnik findOne(String korisnickoIme, String lozinka);
+	Korisnik findOne(Long korisnikId);
 	List<Korisnik> findAll();
 	Korisnik save(Korisnik korisnik);
 	List<Korisnik> save(List<Korisnik> korisnici);
@@ -22,6 +23,7 @@ public interface KorisnikService {
 			LocalDate datRodjenja, LocalDateTime datReg, Boolean administrator, Boolean blokiran);
 	List<Korisnik> findByKorisnickoIme(String korisnickoIme);
 	
+	
 	// loyalty kartica
 	LoyaltyKartica findLoyaltyKartica(String korisnickoIme);
 	LoyaltyKartica saveLK(LoyaltyKartica lk);
@@ -32,5 +34,7 @@ public interface KorisnikService {
 	String findZahtevZaLK(String korisnickoIme);
 	String saveZahtevZaLK(String korisnickoIme);
 	String deleteZahtevZaLK(String korisnickoIme);
-	
+	void updateListaZelja(Korisnik korisnik, String isbn);
+	void deleteFromListaZelja(Korisnik korisnik, String isbn);
+
 }

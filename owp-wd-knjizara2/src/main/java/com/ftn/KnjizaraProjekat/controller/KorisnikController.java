@@ -176,9 +176,9 @@ public class KorisnikController {
 			rezultat.addObject("kupovine", kupovinaService.findAll(korisnickoIme));
 		}
 		
-		if (korisnik != null && korisnik.getListaZelja().size() > 0) {
+		if (korisnik != null && korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null && korisnik.getListaZelja().getListaKnjiga().size() > 0) {
 			List<Knjiga> listaZeljaObj = new ArrayList<Knjiga>();
-			korisnik.getListaZelja().forEach(isbn -> listaZeljaObj.add(knjigaService.findOne(isbn)));
+			korisnik.getListaZelja().getListaKnjiga().forEach(knjiga -> listaZeljaObj.add(knjigaService.findOne(knjiga.getISBN())));
 			rezultat.addObject("listaZelja", listaZeljaObj);
 		}
 		
@@ -267,9 +267,9 @@ public class KorisnikController {
 			if (opcija.equals("prihvati")) {
 				// upisivanje da korisnik poseduje Loyalty Karticu
 				Korisnik korisnik = korisnikService.findOne(korisnickoIme);
-				korisnik.setLoyaltyKartica(true);
+				korisnik.setPosedujeLoyaltyKarticu(true);
 				// dodavanje nove Loyalty Kartice sa 20% popusta za korisnika
-				LoyaltyKartica LK = new LoyaltyKartica(20, 4, korisnickoIme);
+				LoyaltyKartica LK = new LoyaltyKartica(20, 4, korisnik);
 				korisnikService.saveLK(LK);
 				korisnikService.update(korisnik);
 			}

@@ -108,7 +108,7 @@
 				</th:block>
 
 				<th:block th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator == false and
-				session.prijavljeniKorisnik.loyaltyKartica == false and zahtevPodnesen == null}">
+				session.prijavljeniKorisnik.posedujeLoyaltyKarticu == false and zahtevPodnesen == null}">
 					<input type="hidden" name="korisnickoIme" th:value="${korisnik.korisnickoIme}"/>
 					<button type="submit" name="button" value="zahtevZaLK">Posalji zahtev za Loyalty Karticu</button>
 				</th:block>

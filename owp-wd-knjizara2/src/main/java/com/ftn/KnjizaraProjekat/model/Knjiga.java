@@ -3,14 +3,76 @@ package com.ftn.KnjizaraProjekat.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
 public class Knjiga {
-	private String  ISBN, naziv, izdavackaKuca, autor, kratakOpis, jezik;
-	private int godinaIzdavanja, brojStranica;
-	private double cena, prosecnaOcena;
+	
+//	@Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//	private Long id;
+	
+	@Id
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	@Column(name = "ISBN")
+	private String  ISBN;
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private BrojPrimeraka brojPrimeraka;  
+	
+	@Column
+	private String  naziv;
+	
+	@Column
+	private String  izdavackaKuca;
+	
+	@Column
+	private String  autor;
+	
+	@Column(length =1000)
+	private String  kratakOpis;
+	
+	@Column
+	private String  jezik;
+	
+	@Column
+	private int godinaIzdavanja;
+	
+	@Column
+	private int brojStranica;
+	
+	@Column
+	private double cena;
+	
+	@Column
+	private double prosecnaOcena;
+	
+	@Column
 	private String slika;
+	
+	@Column
 	private String tipPoveza;
+	
+	@Column
 	private String pismo;
-	private List<Zanr> zanrovi = new ArrayList<>();
+	
+//	@OneToMany(mappedBy = "knjiga", cascade = CascadeType.ALL)
+	@ManyToMany
+	private List<Zanr> zanr = new ArrayList<>();
+	
 	
 	public Knjiga(){}
 	
@@ -34,12 +96,12 @@ public class Knjiga {
 	}
 
 	public List<Zanr> getZanrovi() {
-		return zanrovi;
+		return zanr;
 	}
 
 	public void setZanrovi(List<Zanr> zanrovi) {
-		this.zanrovi.clear();
-		this.zanrovi.addAll(zanrovi);
+		this.zanr.clear();
+		this.zanr.addAll(zanrovi);
 	}
 
 	public String getISBN() {

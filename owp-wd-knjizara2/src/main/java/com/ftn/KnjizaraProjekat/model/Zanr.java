@@ -1,9 +1,34 @@
 package com.ftn.KnjizaraProjekat.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+
+@Entity
 public class Zanr {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String naziv, opis;
 	
+	@Column
+	private String naziv;
+	
+	@Column
+	private String opis;
+	
+//	@ManyToOne
+//	@JoinColumn(name = "knjiga_id", nullable = false)
+//	@ManyToMany
+//	private List<Knjiga> knjige = new ArrayList<>();
+//	
 	public Zanr(){}
 
 	public Zanr(Long id, String naziv, String opis) {
@@ -16,9 +41,6 @@ public class Zanr {
 		this.naziv = naziv;
 		this.opis = opis;
 	}
-
-
-	
 
 	public Long getId() {
 		return id;

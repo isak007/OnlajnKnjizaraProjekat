@@ -76,12 +76,19 @@ public class KorpaController implements ServletContextAware {
 		}
 		
 		ModelAndView rezultat = new ModelAndView("korpa");
-		if (korisnik != null && korisnik.isLoyaltyKartica()) {
-			LoyaltyKartica lk = korisnikService.findLoyaltyKartica(korisnik.getKorisnickoIme());
-			rezultat.addObject("loyaltyKartica",lk);
+		if (korisnik != null && korisnik.isPosedujeLoyaltyKarticu() && korisnik.getLoyaltyKartica() != null) {
+//			LoyaltyKartica lk = korisnikService.findLoyaltyKartica(korisnik.getKorisnickoIme());
+			rezultat.addObject("loyaltyKartica",korisnik.getLoyaltyKartica());
 		}
 		rezultat.addObject("knjige", korpa);
 		rezultat.addObject("ukupnaCena", ukupnaCena);
+		
+		HashMap<String, Integer> knjigeBrojPrimeraka = new HashMap<String,Integer>();
+		for (Knjiga k : korpa.keySet()) {
+			knjigeBrojPrimeraka.put(k.getISBN(), knjigaService.findBrPrimeraka(k.getISBN()));
+		}
+		rezultat.addObject("knjigeBrojPrimeraka", knjigeBrojPrimeraka);
+		
 		return rezultat;
 	}
 	
@@ -102,7 +109,10 @@ public class KorpaController implements ServletContextAware {
 		for (Knjiga k : korpa.keySet()) {
 			if (knjigaZaDodavanje.getISBN().equals(k.getISBN())){
 				postoji = true;
-				korpa.replace(k, korpa.get(k)+1);
+				int brojPrimerakaZaKupovinu = korpa.get(k)+1;
+				int brojPrimerakaNaStanju = knjigaService.findBrPrimeraka(k.getISBN());
+				// provera da li postoji zeljeni broj primeraka pre dodavanja u korpu
+				if (brojPrimerakaNaStanju >= brojPrimerakaZaKupovinu) korpa.replace(k, korpa.get(k)+1);
 				break;
 			}
 		}
@@ -110,7 +120,6 @@ public class KorpaController implements ServletContextAware {
 			korpa.put(knjigaZaDodavanje, 1);
 		}
 		
-		System.out.println(korpa);
 		servletContext.setAttribute(KorpaController.KORPA_KEY, korpa);
 		response.sendRedirect(baseURL);
 	}
@@ -133,9 +142,8 @@ public class KorpaController implements ServletContextAware {
 			}
 		}
 
-		System.out.println(korpa);
 		servletContext.setAttribute(KorpaController.KORPA_KEY, korpa);
-		response.sendRedirect(baseURL + "/Korpa");
+		response.sendRedirect(baseURL + "Korpa");
 	}
 	
 	

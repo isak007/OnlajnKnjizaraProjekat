@@ -23,6 +23,7 @@ import com.ftn.KnjizaraProjekat.service.KnjigaService;
 import com.ftn.KnjizaraProjekat.service.KorisnikService;
 import com.ftn.KnjizaraProjekat.model.Knjiga;
 import com.ftn.KnjizaraProjekat.model.Korisnik;
+import com.ftn.KnjizaraProjekat.model.ListaZelja;
 
 @Controller
 @RequestMapping(value="/ListaZelja")
@@ -61,18 +62,13 @@ public class ListaZeljaController implements ServletContextAware {
 			return null;
 		}
 		
-		List<Knjiga> listaZelja = new ArrayList<Knjiga>();
-		for (String knjigaISBN : korisnik.getListaZelja()) {
-			listaZelja.add(knjigaService.findOne(knjigaISBN));
+		List<Knjiga> knjige = new ArrayList<Knjiga>();
+		if (korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null) {
+			knjige = korisnik.getListaZelja().getListaKnjiga();
 		}
-				
-		if (listaZelja.isEmpty()) {
-			response.sendRedirect(baseURL);
-			return null;
-		}
-		
+
 		ModelAndView rezultat = new ModelAndView("listaZelja");
-		rezultat.addObject("listaZelja", listaZelja);
+		rezultat.addObject("knjige", knjige);
 		return rezultat;
 	}
 	
@@ -85,24 +81,8 @@ public class ListaZeljaController implements ServletContextAware {
 			response.sendRedirect(baseURL);
 			return;
 		}
-		
-		List<String> listaZelja = korisnik.getListaZelja();
-			
-		boolean postoji = false; 
-		if (listaZelja != null) {
-			for (String knjigaISBN : listaZelja) {
-				if (knjigaISBN.equals(isbn)){
-					postoji = true;
-					break;
-				}
-			}
-		}
-
-		if (!postoji) {
-			korisnik.getListaZelja().add(isbn);	
-			korisnikService.update(korisnik);
-		}
-		
+					
+		korisnikService.updateListaZelja(korisnik,isbn);
 		
 		System.out.println(korisnik.getListaZelja());
 		response.sendRedirect(baseURL);
@@ -120,27 +100,30 @@ public class ListaZeljaController implements ServletContextAware {
 			return;
 		}
 		
-		List<String> listaZelja = new ArrayList<String>();
-		for (String knjigaISBN : korisnik.getListaZelja()) {
-			listaZelja.add(knjigaISBN);
-		}
-		
-		if (listaZelja.isEmpty()) {
+		ListaZelja listaZelja = korisnik.getListaZelja();
+
+		if (listaZelja.getListaKnjiga().size() == 0) {
 			response.sendRedirect(baseURL);
+			System.out.println("yo wtf");
+
 			return;
 		}
+
 		
-		for (String knjigaISBN : listaZelja) {
-			if (knjigaISBN.equals(isbn)){
-				listaZelja.remove(knjigaISBN);
+		Knjiga knjigaZaUklanjanje = null;
+		for (Knjiga knjiga : listaZelja.getListaKnjiga()) {
+			if (knjiga.getISBN().equals(isbn)){
+				knjigaZaUklanjanje = knjiga;
 				break;
 			}
 		}
 		
-		System.out.println(listaZelja);
-		korisnik.setListaZelja(listaZelja);
-		korisnikService.update(korisnik);
-		response.sendRedirect(baseURL + "Korisnici/Details?korisnickoIme=" + korisnik.getKorisnickoIme());
+		if (knjigaZaUklanjanje != null) {
+			listaZelja.getListaKnjiga().remove(knjigaZaUklanjanje);
+			korisnik.setListaZelja(listaZelja);
+			korisnikService.deleteFromListaZelja(korisnik, knjigaZaUklanjanje.getISBN());
+		}
+		response.sendRedirect(baseURL + "/");
 	}
 	
 	

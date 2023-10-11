@@ -9,9 +9,9 @@ public interface KupovinaService {
 	
 	Kupovina findOne(Long kupovinaId);
 	
-	Kupovina findOne(String korisnickoIme);
-
 	List<Kupovina> findAll(String korisnickoIme);
+	
+	List<Kupovina> findAll();
 
 	Kupovina save(Kupovina kupovina);
 	
@@ -20,6 +20,8 @@ public interface KupovinaService {
 	Kupovina update(Kupovina kupovina);
 
 	Kupovina delete(Kupovina kupovina);
+
+	Kupovina findByKupac(Long kupacId);
 	
 	
 }

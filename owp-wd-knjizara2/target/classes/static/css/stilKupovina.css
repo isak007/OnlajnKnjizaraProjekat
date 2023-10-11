@@ -53,6 +53,13 @@ h2{
 	color: black;
 }
 
+#slika{
+	width: 100px;
+    height: 150px;
+    max-width: 100px;
+    max-height: 150px;
+}
+
 #knjige-overflow{
 	color: black;
     background-color: rgba(255,255,255,0.9);

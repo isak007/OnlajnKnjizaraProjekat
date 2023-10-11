@@ -1,8 +1,13 @@
 package com.ftn.KnjizaraProjekat.controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -56,6 +61,27 @@ public class KupovinaController implements ServletContextAware {
 		baseURL = servletContext.getContextPath() + "/";
 	}
 	
+	@GetMapping(value="/Porudzbine")
+	public ModelAndView index(HttpSession session, HttpServletResponse response) throws IOException {		
+		// autentikacija, autorzacija
+		Korisnik prijavljeniKorisnik = (Korisnik) session.getAttribute(KorisnikController.KORISNIK_KEY);
+		if (prijavljeniKorisnik == null) {
+			response.sendRedirect(baseURL);
+			return null;
+		}
+		
+		List<Kupovina> porudzbine = new ArrayList<Kupovina>();
+		
+		if (prijavljeniKorisnik.isAdministrator()) porudzbine = kupovinaService.findAll();
+		else porudzbine = kupovinaService.findAll(prijavljeniKorisnik.getKorisnickoIme());
+		
+		// prosleđivanje
+		ModelAndView rezultat = new ModelAndView("porudzbine");
+		rezultat.addObject("korisnik", prijavljeniKorisnik);
+		rezultat.addObject("porudzbine", porudzbine);
+		
+		return rezultat;
+	}
 
 	@GetMapping(value="/Details")
 	public ModelAndView details(@RequestParam Long id, 
@@ -68,13 +94,13 @@ public class KupovinaController implements ServletContextAware {
 		Kupovina kupovina = kupovinaService.findOne(id);
 		if (kupovina == null) {
 			response.sendRedirect(baseURL);
+			return null;
 		}
-		
 		// prosleđivanje
 		ModelAndView rezultat = new ModelAndView("kupovina");
 		rezultat.addObject("kupovina", kupovina);
-		rezultat.addObject("kupljeneKnjige", kupovina.getListaKupljenihKnjiga());
-
+		if (kupovina.getListaKupljenihKnjiga() != null) rezultat.addObject("kupljeneKnjige", kupovina.getListaKupljenihKnjiga());
+		else response.sendRedirect(baseURL + "Knjige");
 		return rezultat;
 	}
 
@@ -95,6 +121,23 @@ public class KupovinaController implements ServletContextAware {
 		
 		// kreiranje
 		HashMap<Knjiga, Integer> korpa = (HashMap<Knjiga, Integer>) servletContext.getAttribute(KorpaController.KORPA_KEY);
+		
+		if (korpa.size()>0) {
+			for (Knjiga k : korpa.keySet()) {
+				int brojPrimerakaNaStanju = knjigaService.findBrPrimeraka(k.getISBN());
+				int brojKupljenihPrimeraka = korpa.get(k);
+				if (brojPrimerakaNaStanju < brojKupljenihPrimeraka) {
+					response.sendRedirect(baseURL + "Knjige");
+					return;
+				}
+				// azuriranje broja primeraka dostupnih za knjigu
+				knjigaService.updatePrimerke(k.getISBN(), brojPrimerakaNaStanju - brojKupljenihPrimeraka);
+			}
+		} else {
+			response.sendRedirect(baseURL + "Knjige");
+			return;
+		}
+		
 		double ukupnaCena = 0;
 		for (Knjiga k : korpa.keySet()) {
 			// na ukupnu cenu se dodaje cena knjige * broj primeraka za svaku knjigu u korpi
@@ -118,23 +161,19 @@ public class KupovinaController implements ServletContextAware {
 			korisnikService.updateLK(LK);
 		}
 		
-		
-		
-		if (korpa.size()>0) {
-			Kupovina kupovina = new Kupovina(ukupnaCena, LocalDateTime.now(), prijavljeniKorisnik, 0);
-			kupovinaService.save(kupovina);
-			Kupovina kupovinaSaId = kupovinaService.findOne(prijavljeniKorisnik.getKorisnickoIme());
-			int brojKupljenihKnjiga = 0;
-			for (Knjiga k : korpa.keySet()) {
-				brojKupljenihKnjiga += korpa.get(k);
-				KupljenaKnjiga kk = new KupljenaKnjiga(k, kupovinaSaId.getId(), korpa.get(k), k.getCena()*korpa.get(k));
-				kupovinaService.saveKupljenaKnjiga(kk);
-				kupovinaSaId.getListaKupljenihKnjiga().add(kk);
-			}
-			kupovinaSaId.setBrojKupljenihKnjiga(brojKupljenihKnjiga);
-			kupovinaService.update(kupovinaSaId);
-			korpa.clear();
+		Kupovina kupovina = new Kupovina(ukupnaCena, LocalDateTime.now(), prijavljeniKorisnik, 0);
+		kupovinaService.save(kupovina);
+		Kupovina kupovinaSaId = kupovinaService.findByKupac(prijavljeniKorisnik.getId());
+		int brojKupljenihKnjiga = 0;
+		for (Knjiga k : korpa.keySet()) {
+			brojKupljenihKnjiga += korpa.get(k);
+			KupljenaKnjiga kk = new KupljenaKnjiga(k, kupovinaSaId, korpa.get(k), k.getCena()*korpa.get(k));
+			kupovinaService.saveKupljenaKnjiga(kk);
+			kupovinaSaId.getListaKupljenihKnjiga().add(kk);
 		}
+		kupovinaSaId.setBrojKupljenihKnjiga(brojKupljenihKnjiga);
+		kupovinaService.update(kupovinaSaId);
+		korpa.clear();
 		
 		response.sendRedirect(baseURL + "Knjige");
 	}

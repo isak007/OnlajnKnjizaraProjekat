@@ -31,7 +31,7 @@
 							<tr>
 								<td>
 									<a th:href="|Knjige/Details?isbn=${kk.knjiga.ISBN}|">
-										<img th:src="|@{/}/images/${kk.knjiga.slika}|" alt="Knjiga1"/>
+										<img id="slika" th:src="|@{/}/images/${kk.knjiga.slika}|" alt="Knjiga1"/>
 									</a>
 								</td>
 								<td><a id="knjigaNaziv" th:href="|Knjige/Details?isbn=${kk.knjiga.ISBN}|" th:text="${kk.knjiga.naziv}"></a></td>

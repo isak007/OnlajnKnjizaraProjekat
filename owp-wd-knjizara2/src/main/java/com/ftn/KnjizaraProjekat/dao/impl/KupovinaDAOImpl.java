@@ -47,24 +47,24 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 		@Override
 		public void processRow(ResultSet rs) throws SQLException {
 			int index = 1;
-			Long kupovinaId = rs.getLong(index++);
-			double ukupnaCena = rs.getDouble(index++);
+			Long id = rs.getLong(index++);
+			int brojKupljenihKnjiga = rs.getInt(index++);
 			LocalDateTime datKupovine = rs.getTimestamp(index++).toLocalDateTime();
-			String kupac = rs.getString(index++);
-			int brojKnjiga = rs.getInt(index++);
+			double ukupnaCena = rs.getDouble(index++);
+			Long kupacId = rs.getLong(index++);
 
 			Object knjigaISBN = rs.getObject(index++);
+			Kupovina kupovina = kupovine.get(id);
 
-			Kupovina kupovina = kupovine.get(kupovinaId);
 			if (kupovina == null) {
-				kupovina = new Kupovina(kupovinaId,ukupnaCena,datKupovine,korisnikService.findOne(kupac),brojKnjiga);
+				kupovina = new Kupovina(id,ukupnaCena,datKupovine,korisnikService.findOne(kupacId),brojKupljenihKnjiga);
 				kupovine.put(kupovina.getId(), kupovina); // dodavanje u kolekciju
 			}
 			
 			if(knjigaISBN != null) {
 				int brojPrimeraka = rs.getInt(index++);
 				double cena = rs.getDouble(index++);
-				KupljenaKnjiga kupljenaKnjiga = new KupljenaKnjiga(knjigaService.findOne((String)knjigaISBN), kupovinaId, brojPrimeraka, cena);
+				KupljenaKnjiga kupljenaKnjiga = new KupljenaKnjiga(knjigaService.findOne((String)knjigaISBN), kupovina, brojPrimeraka, cena);
 				kupovina.getListaKupljenihKnjiga().add(kupljenaKnjiga);
 			}
 		}
@@ -78,8 +78,8 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 	@Override
 	public Kupovina findOne(Long kupovinaId) {
 		String sql = 
-				"SELECT kup.*, kk.knjigaISBN, kk.brojPrimeraka, kk.cena FROM kupovine kup " + 
-				"LEFT JOIN kupljeneKnjige kk ON kup.id = kk.kupovinaId " + 
+				"SELECT kup.*, kk.knjiga_ISBN, kk.broj_primeraka, kk.cena FROM kupovina kup " + 
+				"LEFT JOIN kupljena_knjiga kk ON kup.id = kk.kupovina_id " + 
 				"WHERE kup.id = ? " + 
 				"ORDER BY kup.id DESC";
 
@@ -93,15 +93,15 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 	}
 	
 	@Override
-	public Kupovina findOne(String korisnickoIme) {
+	public Kupovina findByKupac(Long kupacId) {
 		String sql = 
-				"SELECT kup.*, kk.knjigaISBN, kk.brojPrimeraka, kk.cena FROM kupovine kup " + 
-				"LEFT JOIN kupljeneKnjige kk ON kup.id = kk.kupovinaId " + 
-				"WHERE kup.kupacId = ? " + 
+				"SELECT kup.*, kk.knjiga_ISBN, kk.broj_primeraka, kk.cena FROM kupovina kup " + 
+				"LEFT JOIN kupljena_knjiga kk ON kup.id = kk.kupovina_id " + 
+				"WHERE kup.kupac_id = ? " + 
 				"ORDER BY kup.id DESC";
 
 		KupovinaKnjigaRowCallBackHandler rowCallbackHandler = new KupovinaKnjigaRowCallBackHandler();
-		jdbcTemplate.query(sql, rowCallbackHandler, korisnickoIme);
+		jdbcTemplate.query(sql, rowCallbackHandler, kupacId);
 
 		if (rowCallbackHandler.getKupovine().isEmpty()) {
 			return null;
@@ -111,18 +111,31 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 	
 	@Override
 	public List<Kupovina> findAll(String korisnickoIme) {
+		
 		String sql = 
-				"SELECT kup.*, kk.knjigaISBN, kk.brojPrimeraka, kk.cena FROM kupovine kup " + 
-				"LEFT JOIN kupljeneKnjige kk ON kup.id = kk.kupovinaId " + 
-				"WHERE kup.kupacId = ? " + 
-				"ORDER BY kup.datumKupovine DESC";
+				"SELECT kup.*, kk.knjiga_ISBN, kk.broj_primeraka, kk.cena FROM kupovina kup " + 
+				"LEFT JOIN kupljena_knjiga kk ON kup.id = kk.kupovina_id " + 
+				"WHERE kup.kupac_id = ? " + 
+				"ORDER BY kup.datum_kupovine DESC";
 
 		KupovinaKnjigaRowCallBackHandler rowCallbackHandler = new KupovinaKnjigaRowCallBackHandler();
-		jdbcTemplate.query(sql, rowCallbackHandler, korisnickoIme);
+		jdbcTemplate.query(sql, rowCallbackHandler, korisnikService.findOne(korisnickoIme).getId());
 
 		return rowCallbackHandler.getKupovine();
 	}
 	
+	@Override
+	public List<Kupovina> findAll() {
+		String sql = 
+				"SELECT kup.*, kk.knjiga_ISBN, kk.broj_primeraka, kk.cena FROM kupovina kup " + 
+				"LEFT JOIN kupljena_knjiga kk ON kup.id = kk.kupovina_id " + 
+				"ORDER BY kup.datum_kupovine DESC";
+
+		KupovinaKnjigaRowCallBackHandler rowCallbackHandler = new KupovinaKnjigaRowCallBackHandler();
+		jdbcTemplate.query(sql, rowCallbackHandler);
+
+		return rowCallbackHandler.getKupovine();
+	}
 	
 	@Transactional
 	@Override
@@ -131,12 +144,12 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				String sql = "INSERT INTO kupovine(ukupnaCena,datumKupovine,kupacId,brojKupljenihKnjiga) VALUES (?,?,?,?)";
+				String sql = "INSERT INTO kupovina (ukupna_cena,datum_kupovine,kupac_id,broj_kupljenih_knjiga) VALUES (?,?,?,?)";
 				PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				int index = 1;
 				preparedStatement.setDouble(index++, kupovina.getUkupnaCena());
 				preparedStatement.setTimestamp(index++, Timestamp.valueOf(kupovina.getDatumKupovine()));
-				preparedStatement.setString(index++, kupovina.getKupac().getKorisnickoIme());
+				preparedStatement.setLong(index++, kupovina.getKupac().getId());
 				preparedStatement.setInt(index++, kupovina.getBrojKupljenihKnjiga());
 				
 				return preparedStatement;
@@ -155,11 +168,11 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				String sql = "INSERT INTO kupljeneKnjige VALUES (?,?,?,?)";
+				String sql = "INSERT INTO kupljena_knjiga (knjiga_isbn,kupovina_id,broj_primeraka,cena) VALUES (?,?,?,?)";
 				PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				int index = 1;
 				preparedStatement.setString(index++, kupljenaKnjiga.getKnjiga().getISBN());
-				preparedStatement.setLong(index++, kupljenaKnjiga.getKupovinaId());
+				preparedStatement.setLong(index++, kupljenaKnjiga.getKupovina().getId());
 				preparedStatement.setInt(index++, kupljenaKnjiga.getBrojPrimeraka());
 				preparedStatement.setDouble(index++, kupljenaKnjiga.getCena());
 				return preparedStatement;
@@ -177,17 +190,19 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 	public int update(Kupovina kupovina) {
 		
 		
-		String sql = "DELETE FROM kupljeneKnjige WHERE kupovinaId = ?";
+		String sql = "DELETE FROM kupljena_knjiga WHERE kupovina_id = ?";
 		jdbcTemplate.update(sql, kupovina.getId());
 		
 		boolean uspeh = true;
-		sql = "INSERT INTO kupljeneKnjige (knjigaISBN, kupovinaId, brojPrimeraka, cena) VALUES (?,?,?,?)";
+		sql = "INSERT INTO kupljena_knjiga (knjiga_ISBN, kupovina_id, broj_primeraka, cena) VALUES (?,?,?,?)";
 		for (KupljenaKnjiga kk: kupovina.getListaKupljenihKnjiga()) {	
 			uspeh = uspeh &&  jdbcTemplate.update(sql, kk.getKnjiga().getISBN(), kupovina.getId(),
 					kk.getBrojPrimeraka(), kk.getCena()) == 1;
 		}
 		
-		sql = "UPDATE kupovine SET ukupnaCena = ?, brojKupljenihKnjiga = ? WHERE id = ?";	
+		System.out.println(kupovina.getUkupnaCena());
+		
+		sql = "UPDATE kupovina SET ukupna_cena = ?, broj_kupljenih_knjiga = ? WHERE id = ?";	
 		uspeh = uspeh &&  jdbcTemplate.update(sql, kupovina.getUkupnaCena(), kupovina.getBrojKupljenihKnjiga(),
 				kupovina.getId()) == 1;
 		
@@ -197,10 +212,10 @@ public class KupovinaDAOImpl implements KupovinaDAO{
 	@Transactional
 	@Override
 	public int delete(Kupovina kupovina) {
-		String sql = "DELETE FROM kupljeneKnjige WHERE kupovinaId = ?";
+		String sql = "DELETE FROM kupljena_knjiga WHERE kupovina_id = ?";
 		jdbcTemplate.update(sql, kupovina.getId());
 
-		sql = "DELETE FROM kupovine WHERE id = ?";
+		sql = "DELETE FROM kupovina WHERE id = ?";
 		return jdbcTemplate.update(sql, kupovina.getId());
 	}
 	

@@ -127,6 +127,13 @@ main table td{
 	text-align: left;
 }
 
+#slika{
+	width: 100px;
+    height: 150px;
+    max-width: 100px;
+    max-height: 150px;
+}
+
 main table td a{
     color: black;
     display: inline-block; 
@@ -210,12 +217,12 @@ td a #slika{
 #brojKnjiga{
 	margin: auto;
 	padding: 2px;
+	width:40px;
 }
 
 #update{
-	margin-left: 10px;
+	margin-left: 5px;
 	text-decoration: none;
-	
 }
 
 #update button{

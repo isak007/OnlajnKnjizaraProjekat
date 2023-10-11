@@ -39,29 +39,29 @@ public class ZanrDAOImpl implements ZanrDAO{
 	}
 	@Override
 	public Zanr findOne(Long id) {
-		String sql = "SELECT id, naziv, opis FROM zanrovi WHERE id = ?";
+		String sql = "SELECT id, naziv, opis FROM zanr WHERE id = ?";
 		return jdbcTemplate.queryForObject(sql, new ZanrRowMapper(), id);
 	}
 	@Override
 	public List<Zanr> findAll() {
-		String sql = "SELECT id, naziv, opis FROM zanrovi";
+		String sql = "SELECT id, naziv, opis FROM zanr";
 		return jdbcTemplate.query(sql, new ZanrRowMapper());
 	}
 	@Override
 	public List<Zanr> find(String naziv) {
 		naziv = "%" + naziv + "%";
-		String sql = "SELECT id, naziv FROM zanrovi WHERE naziv LIKE ?";
+		String sql = "SELECT id, naziv FROM zanr WHERE naziv LIKE ?";
 		return jdbcTemplate.query(sql, new ZanrRowMapper(), naziv);
 	}
 	@Override
 	public int save(Zanr zanr) {
-		String sql = "INSERT INTO zanrovi (naziv, opis) VALUES (?,?)";
+		String sql = "INSERT INTO zanr (naziv, opis) VALUES (?,?)";
 		return jdbcTemplate.update(sql, zanr.getNaziv(), zanr.getOpis());
 	}
 	
 	@Override
 	public int [] save(ArrayList<Zanr> zanrovi) {
-		String sql = "INSERT INTO zanrovi (naziv, opis) VALUES (?,?)";
+		String sql = "INSERT INTO zanr (naziv, opis) VALUES (?,?)";
 		
 		return jdbcTemplate.batchUpdate(sql,
 				new BatchPreparedStatementSetter() {
@@ -81,12 +81,12 @@ public class ZanrDAOImpl implements ZanrDAO{
 	
 	@Override
 	public int update(Zanr zanr) {
-		String sql = "UPDATE zanrovi SET naziv = ?, opis = ? WHERE id = ?";
+		String sql = "UPDATE zanr SET naziv = ?, opis = ? WHERE id = ?";
 		return jdbcTemplate.update(sql, zanr.getNaziv(), zanr.getOpis(), zanr.getId());
 	}
 	@Override
 	public int delete(Long id) {
-		String sql = "DELETE FROM zanrovi WHERE id = ?";
+		String sql = "DELETE FROM zanr WHERE id = ?";
 		return jdbcTemplate.update(sql, id);
 	}
 }

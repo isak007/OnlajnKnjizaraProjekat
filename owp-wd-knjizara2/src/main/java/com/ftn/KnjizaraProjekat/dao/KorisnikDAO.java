@@ -9,6 +9,8 @@ import com.ftn.KnjizaraProjekat.model.LoyaltyKartica;
 
 public interface KorisnikDAO {
 
+	public Korisnik findOne(Long korisnikId);
+	
 	public Korisnik findOne(String korisnickoIme);
 
 	public Korisnik findOne(String korisnickoIme, String lozinka);
@@ -39,4 +41,9 @@ public interface KorisnikDAO {
 	public int saveZahtevZaLK(String korisnickoIme);
 	
 	public int deleteZahtevZaLK(String korisnickoIme);
+
+	int updateListaZelja(Korisnik korisnik, String knjigaISBN);
+
+	int deleteFromListaZelja(Korisnik korisnik, String knjigaISBN);
+
 }

@@ -2,7 +2,10 @@ package com.ftn.KnjizaraProjekat.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -96,26 +99,51 @@ public class KnjigeController implements ServletContextAware {
 		
 		// čitanje (pretraga)
 		List<Knjiga> pronadjeneKnjige = knjigaService.find(isbn,naziv,zanrId,cenaMin,cenaMax,autor,jezik,sortiranje,poredak);
-		List<Knjiga> naStanju = new ArrayList<Knjiga>();
-		// provera broja primeraka
-		for (Knjiga k : pronadjeneKnjige) {
-			if (knjigaService.findBrPrimeraka(k.getISBN()) > 0) {
-				naStanju.add(k);
-			}
-		}
+		
 		
 		List<Zanr> zanrovi = zanrService.findAll();
+		Map<Knjiga, String> knjige = new LinkedHashMap<>();
 		
 		// prosleđivanje
 		ModelAndView rezultat = new ModelAndView("index");
+		
 		if (korisnik != null && korisnik.isAdministrator()) {
-			rezultat.addObject("knjige", pronadjeneKnjige);
+			for (Knjiga knjiga: pronadjeneKnjige) {
+				knjige.put(knjiga, "NE_LISTA_ZELJA");
+			}
 		}
+		
+		
 		else {
-			rezultat.addObject("knjige", naStanju);
+			List<Knjiga> naStanju = new ArrayList<Knjiga>();
+			// provera broja primeraka
+			for (Knjiga k : pronadjeneKnjige) {
+				if (knjigaService.findBrPrimeraka(k.getISBN()) > 0) {
+					naStanju.add(k);
+				}
+			}
+			
+			if (korisnik != null && korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null) {
+				for (Knjiga knjiga: naStanju) {
+					String uListiZelja = "NE_LISTA_ZELJA";
+					for (Knjiga knjigaIzListeZelja : korisnik.getListaZelja().getListaKnjiga()) {
+						if (knjiga.getISBN().equals(knjigaIzListeZelja.getISBN())) {
+							uListiZelja = "DA_LISTA_ZELJA";
+							break;
+						}
+					}
+					knjige.put(knjiga, uListiZelja);
+				}
+			}
+			else {
+				for (Knjiga knjiga: naStanju) {
+					knjige.put(knjiga, "NE_LISTA_ZELJA");
+				}
+			}
 		}
-		rezultat.addObject("zanrovi", zanrovi);
 
+		rezultat.addObject("knjige", knjige);
+		rezultat.addObject("zanrovi", zanrovi);
 		return rezultat;
 	}
 
@@ -126,8 +154,24 @@ public class KnjigeController implements ServletContextAware {
 		response.setHeader("Pragma", "no-cache"); // HTTP 1.0.
 		response.setDateHeader("Expires", 0); // Proxies.
 		
+		Korisnik prijavljeniKorisnik = (Korisnik) session.getAttribute(KorisnikController.KORISNIK_KEY);
+			
+		
 		// čitanje
-		Knjiga knjiga = knjigaService.findOne(isbn);
+		Knjiga knjigaObj = knjigaService.findOne(isbn);
+		Map<Knjiga, String> knjiga = new HashMap<>();
+
+		if (prijavljeniKorisnik != null && !prijavljeniKorisnik.isAdministrator()) {
+			String uListiZelja = "NE_LISTA_ZELJA";
+			if (prijavljeniKorisnik.getListaZelja() != null && prijavljeniKorisnik.getListaZelja().getListaKnjiga() != null) {
+				for (Knjiga knjigaListaZelja : prijavljeniKorisnik.getListaZelja().getListaKnjiga()) {
+					if (knjigaListaZelja.getISBN().equals(isbn)) uListiZelja = "DA_LISTA_ZELJA";
+				}
+			}
+			knjiga.put(knjigaObj, uListiZelja);
+		} else {
+			knjiga.put(knjigaObj, "NE_LISTA_ZELJA");
+		}
 		
 		int brojPrimeraka = knjigaService.findBrPrimeraka(isbn);
 		// ako je brojPrimeraka -1 onda ne postoje primerci u samoj bazi, 
@@ -137,7 +181,7 @@ public class KnjigeController implements ServletContextAware {
 		
 		// ids zanrova za pronadjeni film jer objekti zanrova knjige nisu isti objekti svih zanrova
 		List<Long> knjigaZanroviIds = new ArrayList<>();
-		knjiga.getZanrovi().forEach(zanr -> knjigaZanroviIds.add(zanr.getId()));
+		knjigaObj.getZanrovi().forEach(zanr -> knjigaZanroviIds.add(zanr.getId()));
 		
 		// prosleđivanje
 		ModelAndView rezultat = new ModelAndView("knjiga");
@@ -287,7 +331,6 @@ public class KnjigeController implements ServletContextAware {
 		if (brojPrimeraka != -1) {
 			knjigaService.updatePrimerke(isbn, brojPrimeraka + brPrimerakaZaPorucivanje);
 		}
-		
 		// u suprotnom se kreira u bazi 
 		else {
 			knjigaService.savePrimerke(isbn, brPrimerakaZaPorucivanje);

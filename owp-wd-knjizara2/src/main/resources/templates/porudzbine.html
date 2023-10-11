@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Korisnici</title>
+    <link rel="stylesheet" href="css/stilPorudzbine.css">
+    <script></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+
+		<main>
+
+			<h2 th:if="${korisnik.administrator and porudzbine.size() > 0}"> Sve porudžbine </h2>
+			<h2 th:if="${korisnik.administrator and porudzbine.size() == 0}"> Trenutno nema porudžbina </h2>
+			<h2 th:if="${not korisnik.administrator and porudzbine.size() > 0}"> Vaše porudžbine </h2>
+			<h2 th:if="${not korisnik.administrator and porudzbine.size() == 0}"> Nemate porudžbina </h2>
+			<table th:if="${porudzbine.size() > 0}">
+				<tr>
+					<th>Kupac</th>
+					
+					<th>Broj knjiga</th>
+					<th>Datum kupovine</th>
+					<th>Ukupna cena</th>
+					
+					<th></th>
+				</tr>
+
+				<th:block th:each="porudzbina, status: ${porudzbine}">
+					<tr class="linija"/>
+
+					<tr>
+						<td>
+							<a class="korisnickoIme" th:href="|Korisnici/Details?korisnickoIme=${porudzbina.kupac.korisnickoIme}|" th:text="${porudzbina.kupac.korisnickoIme}"/>
+						</td>
+						
+						<td th:text="${porudzbina.brojKupljenihKnjiga}"></td>
+						<td th:text="${#temporals.format(porudzbina.datumKupovine, 'dd-MM-yyyy HH:mm')}"></td>
+						<td th:text="${porudzbina.ukupnaCena}"></td>
+						
+						<td id="pregledKupovine">
+							<a th:href="|Kupovina/Details?id=${porudzbina.id}|">Pregled</a>
+						</td>
+					</tr>
+
+				</th:block>
+
+			</table>
+		</main>
+
+	</div>
+</body>
+</html>

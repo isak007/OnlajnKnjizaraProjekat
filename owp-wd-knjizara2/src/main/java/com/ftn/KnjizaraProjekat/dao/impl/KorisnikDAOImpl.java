@@ -24,7 +24,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ftn.KnjizaraProjekat.dao.KorisnikDAO;
+import com.ftn.KnjizaraProjekat.model.Knjiga;
 import com.ftn.KnjizaraProjekat.model.Korisnik;
+import com.ftn.KnjizaraProjekat.model.ListaZelja;
 import com.ftn.KnjizaraProjekat.model.LoyaltyKartica;
 
 @Repository
@@ -32,6 +34,9 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private KnjigaDAOImpl knjigaDAOImpl; 
 
 	
 	private class KorisnikKnjigaRowCallBackHandler implements RowCallbackHandler {
@@ -41,29 +46,30 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 		@Override
 		public void processRow(ResultSet rs) throws SQLException {
 			int index = 1;
-			String korisnickoIme = rs.getString(index++);
-			String lozinka = rs.getString(index++);
+			Long id = rs.getLong(index++);
+			Boolean administrator = rs.getBoolean(index++);
+			String adresa = rs.getString(index++);
+			Boolean blokiran = rs.getBoolean(index++);
+			String brTel = rs.getString(index++);
+			LocalDateTime datReg = rs.getTimestamp(index++).toLocalDateTime();
+			LocalDate datRodjenja = rs.getTimestamp(index++).toLocalDateTime().toLocalDate();
 			String eMail = rs.getString(index++);
 			String ime = rs.getString(index++);
+			String korisnickoIme = rs.getString(index++);
+			String lozinka = rs.getString(index++);
+			Boolean posedujeLoyaltyKarticu = rs.getBoolean(index++);
 			String prezime = rs.getString(index++);
-			String adresa = rs.getString(index++);
-			String brTel = rs.getString(index++);
-			LocalDate datRodjenja = rs.getTimestamp(index++).toLocalDateTime().toLocalDate();
-			LocalDateTime datReg = rs.getTimestamp(index++).toLocalDateTime();
-			Boolean administrator = rs.getBoolean(index++);
-			Boolean blokiran = rs.getBoolean(index++);
-			Boolean loyaltyKartica = rs.getBoolean(index++);
-			Object knjigaISBN = rs.getObject(index++);
+//			Object knjigaISBN = rs.getObject(index++);
 			Korisnik korisnik = korisnici.get(korisnickoIme);
 			if (korisnik == null) {
-				korisnik = new Korisnik(korisnickoIme, lozinka, eMail, ime, prezime, adresa, brTel, datRodjenja, datReg, 
-						administrator, blokiran, loyaltyKartica);
+				korisnik = new Korisnik(id, korisnickoIme, lozinka, eMail, ime, prezime, adresa, brTel, datRodjenja, datReg, 
+						administrator, blokiran, posedujeLoyaltyKarticu);
 				korisnici.put(korisnik.getKorisnickoIme(), korisnik); // dodavanje u kolekciju
 			}
 			
-			if(knjigaISBN != null) {
-				korisnik.getListaZelja().add((String)knjigaISBN);
-			}
+//			if(knjigaISBN != null) {
+//				korisnik.getListaZelja().add((String)knjigaISBN);
+//			}
 			
 		}
 
@@ -74,13 +80,30 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	}
 	
 	@Override
+	public Korisnik findOne(Long korisnikId) {
+		String sql = 
+				"SELECT ko.* FROM korisnik ko " + 
+				"WHERE ko.id = ? " + 
+				"ORDER BY ko.id";
+
+		KorisnikKnjigaRowCallBackHandler rowCallbackHandler = new KorisnikKnjigaRowCallBackHandler();
+		jdbcTemplate.query(sql, rowCallbackHandler, korisnikId);
+
+		if (rowCallbackHandler.getKorisnici().isEmpty()) {
+			return null;
+		}
+		return rowCallbackHandler.getKorisnici().get(0);
+	}
+	
+	@Override
 	public Korisnik findOne(String korisnickoIme) {
 		String sql = 
-				"SELECT ko.*, k.ISBN FROM korisnici ko " + 
-				"LEFT JOIN listaZelja lz ON ko.korisnickoIme = lz.korisnickoIme " + 
-				"LEFT JOIN knjige k ON lz.knjigaISBN = k.ISBN " + 
-				"WHERE ko.korisnickoIme = ? " + 
-				"ORDER BY ko.korisnickoIme";
+				"SELECT ko.*, k.ISBN FROM korisnik ko " + 
+				"LEFT JOIN lista_zelja lz ON ko.korisnicko_ime = lz.korisnicko_ime " + 
+				"LEFT JOIN lista_zelja_knjiga lzk ON ko.korisnicko_ime = lzk.lista_zelja_korisnicko_ime " + 
+				"LEFT JOIN knjiga k ON lzk.knjiga_ISBN = k.ISBN " + 
+				"WHERE ko.korisnicko_ime = ? " + 
+				"ORDER BY ko.korisnicko_ime";
 
 		KorisnikKnjigaRowCallBackHandler rowCallbackHandler = new KorisnikKnjigaRowCallBackHandler();
 		jdbcTemplate.query(sql, rowCallbackHandler, korisnickoIme);
@@ -94,11 +117,12 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	@Override
 	public Korisnik findOne(String korisnickoIme, String lozinka) {
 		String sql = 
-				"SELECT ko.*, k.ISBN FROM korisnici ko " + 
-				"LEFT JOIN listaZelja lz ON ko.korisnickoIme = lz.korisnickoIme " + 
-				"LEFT JOIN knjige k ON lz.knjigaISBN = k.ISBN " + 
-				"WHERE ko.korisnickoIme = ? AND ko.lozinka = ?" + 
-				"ORDER BY ko.korisnickoIme";
+				"SELECT ko.*, k.ISBN FROM korisnik ko " + 
+				"LEFT JOIN lista_zelja lz ON ko.korisnicko_ime = lz.korisnicko_ime " + 
+				"LEFT JOIN lista_zelja_knjiga lzk ON ko.korisnicko_ime = lzk.lista_zelja_korisnicko_ime " + 
+				"LEFT JOIN knjiga k ON lzk.knjiga_ISBN = k.ISBN " + 
+				"WHERE ko.korisnicko_ime = ? AND ko.lozinka = ? " + 
+				"ORDER BY ko.korisnicko_ime";
 
 		KorisnikKnjigaRowCallBackHandler rowCallbackHandler = new KorisnikKnjigaRowCallBackHandler();
 		jdbcTemplate.query(sql, rowCallbackHandler, korisnickoIme, lozinka);
@@ -112,10 +136,11 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	@Override
 	public List<Korisnik> findAll() {
 		String sql = 
-				"SELECT ko.*, k.ISBN FROM korisnici ko " + 
-				"LEFT JOIN listaZelja lz ON ko.korisnickoIme = lz.korisnickoIme " + 
-				"LEFT JOIN knjige k ON lz.knjigaISBN = k.ISBN " + 
-				"ORDER BY ko.korisnickoIme";
+				"SELECT ko.*, k.ISBN FROM korisnik ko " + 
+				"LEFT JOIN lista_zelja lz ON ko.korisnicko_ime = lz.korisnicko_ime " + 
+				"LEFT JOIN lista_zelja_knjiga lzk ON ko.korisnicko_ime = lzk.lista_zelja_korisnicko_ime " + 
+				"LEFT JOIN knjiga k ON lzk.knjiga_ISBN = k.ISBN " + 
+				"ORDER BY ko.korisnicko_ime";
 
 		KorisnikKnjigaRowCallBackHandler rowCallbackHandler = new KorisnikKnjigaRowCallBackHandler();
 		jdbcTemplate.query(sql, rowCallbackHandler);
@@ -130,9 +155,10 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 		
 		ArrayList<Object> listaArgumenata = new ArrayList<Object>();
 		
-		String sql = "SELECT ko.*, k.ISBN FROM korisnici ko " + 
-				"LEFT JOIN listaZelja lz ON ko.korisnickoIme = lz.korisnickoIme " + 
-				"LEFT JOIN knjige k ON lz.knjigaISBN = k.ISBN ";
+		String sql = "SELECT ko.*, k.ISBN FROM korisnik ko " + 
+				"LEFT JOIN lista_zelja lz ON ko.korisnicko_ime = lz.korisnicko_ime " + 
+				"LEFT JOIN lista_zelja_knjiga lzk ON ko.korisnicko_ime = lzk.lista_zelja_korisnicko_ime " + 
+				"LEFT JOIN knjiga k ON lzk.knjiga_ISBN = k.ISBN ";
 		
 		StringBuffer whereSql = new StringBuffer(" WHERE ");
 		boolean imaArgumenata = false;
@@ -159,7 +185,7 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 			eMail = "%" + eMail + "%";
 			if(imaArgumenata)
 				whereSql.append(" AND ");
-			whereSql.append("ko.eMail LIKE ?");
+			whereSql.append("ko.e_mail LIKE ?");
 			imaArgumenata = true;
 			listaArgumenata.add(eMail);
 		}
@@ -195,7 +221,7 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 			brTel = "%" + brTel + "%";
 			if(imaArgumenata)
 				whereSql.append(" AND ");
-			whereSql.append("ko.brTel LIKE ?");
+			whereSql.append("ko.br_tel LIKE ?");
 			imaArgumenata = true;
 			listaArgumenata.add(brTel);
 		}
@@ -220,11 +246,11 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 		
 		KorisnikKnjigaRowCallBackHandler rowCallbackHandler = new KorisnikKnjigaRowCallBackHandler();
 		if(imaArgumenata) {
-			sql=sql + whereSql.toString()+" ORDER BY ko.korisnickoIme";
+			sql=sql + whereSql.toString()+" ORDER BY ko.korisnicko_ime";
 			jdbcTemplate.query(sql, rowCallbackHandler, listaArgumenata);
 		}
 		else {
-			sql=sql + " ORDER BY ko.korisnickoIme";
+			sql=sql + " ORDER BY ko.korisnicko_ime";
 			jdbcTemplate.query(sql, rowCallbackHandler);
 		}
 		
@@ -234,7 +260,7 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 		
 	}
 	
-	
+		
 	@Transactional
 	@Override
 	public int save(Korisnik korisnik) {
@@ -242,21 +268,23 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				String sql = "INSERT INTO korisnici VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+				String sql = "INSERT INTO korisnik"
+						+ " (administrator,adresa,blokiran,br_tel,datum_reg,datum_rodjenja,e_mail,ime,korisnicko_ime,lozinka,poseduje_loyalty_karticu,prezime)"
+						+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 				PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				int index = 1;
-				preparedStatement.setString(index++, korisnik.getKorisnickoIme());
-				preparedStatement.setString(index++, korisnik.getLozinka());
+				preparedStatement.setBoolean(index++, korisnik.isAdministrator());
+				preparedStatement.setString(index++, korisnik.getAdresa());
+				preparedStatement.setBoolean(index++, korisnik.isBlokiran());
+				preparedStatement.setString(index++, korisnik.getBrTel());
+				preparedStatement.setTimestamp(index++, Timestamp.valueOf(korisnik.getDatumReg()));
+				preparedStatement.setDate(index++, Date.valueOf(korisnik.getDatumRodjenja()));
 				preparedStatement.setString(index++, korisnik.getEMail());
 				preparedStatement.setString(index++, korisnik.getIme());
+				preparedStatement.setString(index++, korisnik.getKorisnickoIme());
+				preparedStatement.setString(index++, korisnik.getLozinka());
+				preparedStatement.setBoolean(index++, korisnik.isPosedujeLoyaltyKarticu());
 				preparedStatement.setString(index++, korisnik.getPrezime());
-				preparedStatement.setString(index++, korisnik.getAdresa());
-				preparedStatement.setString(index++, korisnik.getBrTel());
-				preparedStatement.setDate(index++, Date.valueOf(korisnik.getDatumRodjenja()));
-				preparedStatement.setTimestamp(index++, Timestamp.valueOf(korisnik.getDatumReg()));
-				preparedStatement.setBoolean(index++, korisnik.isAdministrator());
-				preparedStatement.setBoolean(index++, korisnik.isBlokiran());
-				preparedStatement.setBoolean(index++, korisnik.isLoyaltyKartica());
 				return preparedStatement;
 			}
 
@@ -270,18 +298,10 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	@Transactional
 	@Override
 	public int update(Korisnik korisnik) {
-		
-		String sql = "DELETE FROM listaZelja WHERE korisnickoIme = ?";
-		jdbcTemplate.update(sql, korisnik.getKorisnickoIme());
-	
+			
 		boolean uspeh = true;
-		sql = "INSERT INTO listaZelja (knjigaISBN, korisnickoIme) VALUES (?, ?)";
-		for (String knjigaISBN: korisnik.getListaZelja()) {	
-			uspeh = uspeh &&  jdbcTemplate.update(sql, knjigaISBN, korisnik.getKorisnickoIme()) == 1;
-		}
-		
-		sql = "UPDATE korisnici SET administrator = ?, blokiran = ?, loyaltyKartica = ? WHERE korisnickoIme = ?";	
-		uspeh = uspeh &&  jdbcTemplate.update(sql, korisnik.isAdministrator(), korisnik.isBlokiran(), korisnik.isLoyaltyKartica(),
+		String sql = "UPDATE korisnik SET administrator = ?, blokiran = ?, poseduje_loyalty_karticu = ? WHERE korisnicko_ime = ?";	
+		uspeh = uspeh &&  jdbcTemplate.update(sql, korisnik.isAdministrator(), korisnik.isBlokiran(), korisnik.isPosedujeLoyaltyKarticu(),
 				korisnik.getKorisnickoIme()) == 1;
 		
 		return uspeh?1:0;
@@ -289,11 +309,93 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	
 	@Transactional
 	@Override
+	public int updateListaZelja(Korisnik korisnik, String knjigaISBN) {
+		
+//		String sql = "DELETE FROM lista_zelja WHERE korisnicko_ime = ?";
+//		jdbcTemplate.update(sql, korisnik.getKorisnickoIme());
+	
+//		boolean uspeh = true;
+//		sql = "INSERT INTO lista_zelja (broj_knjiga, korisnicko_ime) VALUES (?, ?)";
+//		if (korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null) {
+//			
+//			for (Knjiga knjiga: korisnik.getListaZelja().getListaKnjiga()) {	
+//				uspeh = uspeh &&  jdbcTemplate.update(sql, knjiga.getISBN(), korisnik.getKorisnickoIme()) == 1;
+//			}
+//		}
+		
+		boolean uspeh = true;
+		
+		if (korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null) {
+			
+			boolean postoji = false; 
+			for (Knjiga knjiga : korisnik.getListaZelja().getListaKnjiga()) {
+				if (knjiga.getISBN().equals(knjigaISBN)){
+					postoji = true;
+					break;
+				}
+			}
+			
+			if (!postoji) {
+				korisnik.getListaZelja().getListaKnjiga().add(knjigaDAOImpl.findOne(knjigaISBN));
+				String sql = "INSERT INTO lista_zelja_knjiga (lista_zelja_korisnicko_ime, knjiga_isbn) VALUES (?, ?)";
+				uspeh = uspeh &&  jdbcTemplate.update(sql, korisnik.getKorisnickoIme(), knjigaISBN) == 1;
+			}
+			
+			else {
+				uspeh = false;
+			}
+
+		}
+
+		else {
+			ListaZelja lz = new ListaZelja();
+			List<Knjiga> listaKnjiga = new ArrayList<Knjiga>();
+			listaKnjiga.add(knjigaDAOImpl.findOne(knjigaISBN));
+			lz.setListaKnjiga(listaKnjiga);
+			korisnik.setListaZelja(lz);	
+			String sql = "INSERT INTO lista_zelja (broj_knjiga, korisnicko_ime) VALUES (?, ?)";
+			uspeh = uspeh &&  jdbcTemplate.update(sql, 1, korisnik.getKorisnickoIme()) == 1;
+			sql = "INSERT INTO lista_zelja_knjiga (lista_zelja_korisnicko_ime, knjiga_isbn) VALUES (?, ?)";
+			uspeh = uspeh &&  jdbcTemplate.update(sql, korisnik.getKorisnickoIme(), knjigaISBN) == 1;
+		}
+		
+		return uspeh?1:0;
+	}
+	
+	@Transactional
+	@Override
+	public int deleteFromListaZelja(Korisnik korisnik, String knjigaISBN) {
+		
+		boolean uspeh = true;
+		
+		if (korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null) {
+			
+			boolean postoji = false; 
+			for (Knjiga knjiga : korisnik.getListaZelja().getListaKnjiga()) {
+				if (knjiga.getISBN().equals(knjigaISBN)){
+					postoji = true;
+					break;
+				}
+			}
+			
+			if (postoji) {
+				korisnik.getListaZelja().getListaKnjiga().remove(knjigaDAOImpl.findOne(knjigaISBN));
+				String sql = "DELETE FROM lista_zelja_knjiga WHERE lista_zelja_korisnicko_ime = ? && knjiga_isbn = ?";
+				uspeh = uspeh &&  jdbcTemplate.update(sql, korisnik.getKorisnickoIme(), knjigaISBN) == 1;
+			}
+			
+		}
+		
+		return uspeh?1:0;
+	}
+	
+	@Transactional
+	@Override
 	public int delete(String korisnickoIme) {
-		String sql = "DELETE FROM listaZelja WHERE korisnickoIme = ?";
+		String sql = "DELETE FROM lista_zelja WHERE korisnicko_ime = ?";
 		jdbcTemplate.update(sql, korisnickoIme);
 
-		sql = "DELETE FROM korisnici WHERE korisnickoIme = ?";
+		sql = "DELETE FROM korisnik WHERE korisnicko_ime = ?";
 		return jdbcTemplate.update(sql, korisnickoIme);
 	}
 	
@@ -301,13 +403,16 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	/////////////////
 	private class LKRowMapper implements RowMapper<LoyaltyKartica> {
 	
+		@Autowired
+		KorisnikDAOImpl korisnikDAO;
+		
 		@Override
 		public LoyaltyKartica mapRow(ResultSet rs, int rowNum) throws SQLException {
 			int index = 1;
 			int popust = rs.getInt(index++);
 			int brojPoena = rs.getInt(index++);
-			String kupacId = rs.getString(index++);
-			LoyaltyKartica lk = new LoyaltyKartica(popust,brojPoena,kupacId);
+			Long korisnikId = rs.getLong(index++);
+			LoyaltyKartica lk = new LoyaltyKartica(popust,brojPoena,korisnikDAO.findOne(korisnikId));
 			return lk;
 		}
 	}
@@ -315,9 +420,9 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	@Override
 	public LoyaltyKartica findLoyaltyKartica(String korisnickoIme) {
 	String sql = 
-		"SELECT lk.* FROM loyaltyKartica lk "+ 
-		"WHERE lk.kupacId = ? " + 
-		"ORDER BY lk.kupacId";
+		"SELECT lk.* FROM loyalty_kartica lk "+ 
+		"WHERE lk.korisnik_id = ? " + 
+		"ORDER BY lk.korisnik_id";
 		
 		if(!jdbcTemplate.query(sql, new LKRowMapper(), korisnickoIme).isEmpty()) {
 			return jdbcTemplate.query(sql, new LKRowMapper(), korisnickoIme).get(0);
@@ -329,19 +434,19 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	
 	@Override
 	public int saveLK(LoyaltyKartica lk) {
-		String sql = "INSERT INTO loyaltyKartica (popust,brojPoena,kupacId) VALUES (?,?,?)";
-		return jdbcTemplate.update(sql, lk.getPopust(), lk.getBrojPoena(), lk.getKupacId());
+		String sql = "INSERT INTO loyalty_kartica (korisnik_id,broj_poena,popust) VALUES (?,?,?)";
+		return jdbcTemplate.update(sql,  lk.getKorisnik().getId(), lk.getBrojPoena(), lk.getPopust());
 	}
 	
 	@Override
 	public int updateLK(LoyaltyKartica lk) {
-		String sql = "UPDATE loyaltyKartica SET popust = ?, brojPoena = ? WHERE kupacId = ?";
-		return jdbcTemplate.update(sql, lk.getPopust(), lk.getBrojPoena(), lk.getKupacId());
+		String sql = "UPDATE loyalty_kartica SET popust = ?, broj_poena = ? WHERE korisnik_id = ?";
+		return jdbcTemplate.update(sql, lk.getPopust(), lk.getBrojPoena(), lk.getKorisnik().getId());
 	}
 	@Override
 	public int deleteLK(LoyaltyKartica lk) {
-		String sql = "DELETE FROM loyaltyKartica WHERE kupacId = ?";
-		return jdbcTemplate.update(sql, lk.getKupacId());
+		String sql = "DELETE FROM loyalty_kartica WHERE korisnik_id = ?";
+		return jdbcTemplate.update(sql, lk.getKorisnik().getId());
 	}
 	
 	
@@ -361,9 +466,9 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	@Override
 	public String findZahtevZaLK(String korisnickoIme) {
 	String sql = 
-		"SELECT * FROM zahtevZaLK  "+ 
-		"WHERE korisnickoIme = ? " +
-		"ORDER BY korisnickoIme";
+		"SELECT * FROM zahtev_zalk  "+ 
+		"WHERE korisnicko_ime = ? " +
+		"ORDER BY korisnicko_ime";
 		
 		if(!jdbcTemplate.query(sql, new ZahtevZaLKRowMapper(), korisnickoIme).isEmpty()) {
 			return jdbcTemplate.query(sql, new ZahtevZaLKRowMapper(), korisnickoIme).get(0);
@@ -375,14 +480,15 @@ public class KorisnikDAOImpl implements KorisnikDAO{
 	
 	@Override
 	public int saveZahtevZaLK(String korisnickoIme) {
-		String sql = "INSERT INTO zahtevZaLK (korisnickoIme) VALUES (?)";
+		String sql = "INSERT INTO zahtev_zalk (korisnicko_ime) VALUES (?)";
 		return jdbcTemplate.update(sql, korisnickoIme);
 	}
 	
 	@Override
 	public int deleteZahtevZaLK(String korisnickoIme) {
-		String sql = "DELETE FROM zahtevZaLK WHERE korisnickoIme = ?";
+		String sql = "DELETE FROM zahtev_zalk WHERE korisnicko_ime = ?";
 		return jdbcTemplate.update(sql, korisnickoIme);
 	}
+
 	
 }

@@ -44,21 +44,19 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		public void processRow(ResultSet resultSet) throws SQLException {
 			int index = 1;
 			String ISBN = resultSet.getString(index++);
-			String naziv = resultSet.getString(index++);
-			String izdavackaKuca = resultSet.getString(index++);
 			String autor = resultSet.getString(index++);
-			String kratakOpis = resultSet.getString(index++);
-			String jezik = resultSet.getString(index++);
-			Integer godinaIzdavanja = resultSet.getInt(index++);
 			Integer brojStranica = resultSet.getInt(index++);
 			Double cena = resultSet.getDouble(index++);
+			Integer godinaIzdavanja = resultSet.getInt(index++);
+			String izdavackaKuca = resultSet.getString(index++);
+			String jezik = resultSet.getString(index++);
+			String kratakOpis = resultSet.getString(index++);
+			String naziv = resultSet.getString(index++);
+			String pismo = resultSet.getString(index++);
 			Double prosecnaOcena = resultSet.getDouble(index++);
-			
 			String slika = resultSet.getString(index++);
 			String tipPoveza = resultSet.getString(index++);
-			String pismo = resultSet.getString(index++);
 			
-
 			Knjiga knjiga = knjige.get(ISBN);
 			if (knjiga == null) {
 				knjiga = new Knjiga(ISBN, naziv, izdavackaKuca, autor, kratakOpis, jezik, godinaIzdavanja, 
@@ -85,9 +83,9 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 	@Override
 	public Knjiga findOne(String ISBN) {
 		String sql = 
-				"SELECT k.*, z.id, z.naziv, z.opis FROM knjige k " + 
-				"LEFT JOIN knjigaZanr kz ON kz.knjigaISBN = k.ISBN " + 
-				"LEFT JOIN zanrovi z ON kz.zanrId = z.id " + 
+				"SELECT k.*, z.id, z.naziv, z.opis FROM knjiga k " + 
+				"LEFT JOIN knjiga_zanr kz ON kz.knjiga_ISBN = k.ISBN " + 
+				"LEFT JOIN zanr z ON kz.zanr_id = z.id " + 
 				"WHERE k.ISBN = ? " + 
 				"ORDER BY k.ISBN";
 
@@ -100,9 +98,9 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 	@Override
 	public List<Knjiga> findAll() {
 		String sql = 
-				"SELECT k.*, z.id, z.naziv, z.opis FROM knjige k " + 
-				"LEFT JOIN knjigaZanr kz ON kz.knjigaISBN = k.ISBN " + 
-				"LEFT JOIN zanrovi z ON kz.zanrId = z.id " + 
+				"SELECT k.*, z.id, z.naziv, z.opis FROM knjiga k " + 
+				"LEFT JOIN knjiga_zanr kz ON kz.knjiga_ISBN = k.ISBN " + 
+				"LEFT JOIN zanr z ON kz.zanr_id = z.id " + 
 				"ORDER BY k.ISBN";
 
 		KnjigaZanrRowCallBackHandler rowCallbackHandler = new KnjigaZanrRowCallBackHandler();
@@ -118,7 +116,9 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				String sql = "INSERT INTO knjige VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				String sql = "INSERT INTO knjiga "
+						+ "(isbn,naziv,izdavacka_kuca,autor,kratak_opis,jezik,godina_izdavanja,broj_stranica,cena,prosecna_ocena,slika,tip_poveza,pismo)"
+						+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 				PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				int index = 1;
@@ -143,11 +143,11 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 		boolean uspeh = jdbcTemplate.update(preparedStatementCreator, keyHolder) == 1;
 		if (uspeh) {
-			String sql = "INSERT INTO knjigaZanr (knjigaISBN, zanrId) VALUES (?, ?)";
+			String sql = "INSERT INTO knjiga_zanr (knjiga_ISBN, zanr_id) VALUES (?, ?)";
 			for (Zanr itZanr: knjiga.getZanrovi()) {	
 				uspeh = uspeh && jdbcTemplate.update(sql, knjiga.getISBN(), itZanr.getId()) == 1;
 			}	
-			sql = "INSERT INTO brojPrimeraka (knjigaISBN, brojKnjiga) VALUES (?, 0)";
+			sql = "INSERT INTO broj_primeraka (knjiga_ISBN, broj_knjiga) VALUES (?, 0)";
 			uspeh = uspeh && jdbcTemplate.update(sql, knjiga.getISBN()) == 1;
 		}
 		return uspeh?1:0;
@@ -160,17 +160,17 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		boolean uspeh = true;
 		
 		if (knjiga.getZanrovi() != null) {
-			sql = "DELETE FROM knjigaZanr WHERE knjigaISBN = ?";
+			sql = "DELETE FROM knjiga_zanr WHERE knjiga_ISBN = ?";
 			jdbcTemplate.update(sql, knjiga.getISBN());
 			
-			sql = "INSERT INTO knjigaZanr (knjigaISBN, zanrId) VALUES (?, ?)";
+			sql = "INSERT INTO knjiga_zanr (knjiga_ISBN, zanr_id) VALUES (?, ?)";
 			for (Zanr itZanr: knjiga.getZanrovi()) {	
 				uspeh = uspeh &&  jdbcTemplate.update(sql, knjiga.getISBN(), itZanr.getId()) == 1;
 			}
 		}
 		
-		sql = "UPDATE knjige SET naziv = ?, izdavackaKuca = ?, autor = ?, kratakOpis = ?, jezik = ?, godinaIzdavanja = ?, brojStranica = ?,"
-				+ "  cena = ?, prosecnaOcena = ?, slika = ?, tipPoveza = ?, pismo = ? WHERE ISBN = ?";	
+		sql = "UPDATE knjiga SET naziv = ?, izdavacka_kuca = ?, autor = ?, kratak_opis = ?, jezik = ?, godina_izdavanja = ?, broj_stranica = ?,"
+				+ "  cena = ?, prosecna_ocena = ?, slika = ?, tip_poveza = ?, pismo = ? WHERE ISBN = ?";	
 		uspeh = uspeh &&  jdbcTemplate.update(sql, knjiga.getNaziv(), knjiga.getIzdavackaKuca(), knjiga.getAutor(), knjiga.getKratakOpis(),
 				knjiga.getJezik(), knjiga.getGodinaIzdavanja(), knjiga.getBrojStranica(), knjiga.getCena(), knjiga.getProsecnaOcena(), knjiga.getSlika(),
 				knjiga.getTipPoveza(), knjiga.getPismo(), knjiga.getISBN()) == 1;
@@ -182,10 +182,10 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 	@Transactional
 	@Override
 	public int delete(String ISBN) {
-		String sql = "DELETE FROM knjigaZanr WHERE knjigaISBN = ?";
+		String sql = "DELETE FROM knjiga_zanr WHERE knjiga_ISBN = ?";
 		jdbcTemplate.update(sql, ISBN);
 
-		sql = "DELETE FROM knjige WHERE id = ?";
+		sql = "DELETE FROM knjiga WHERE id = ?";
 		return jdbcTemplate.update(sql, ISBN);
 	}
 
@@ -196,18 +196,18 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		public Knjiga mapRow(ResultSet resultSet, int rowNum) throws SQLException {
 			int index = 1;
 			String ISBN = resultSet.getString(index++);
-			String naziv = resultSet.getString(index++);
-			String izdavackaKuca = resultSet.getString(index++);
 			String autor = resultSet.getString(index++);
-			String kratakOpis = resultSet.getString(index++);
-			String jezik = resultSet.getString(index++);
-			Integer godinaIzdavanja = resultSet.getInt(index++);
 			Integer brojStranica = resultSet.getInt(index++);
 			Double cena = resultSet.getDouble(index++);
+			Integer godinaIzdavanja = resultSet.getInt(index++);
+			String izdavackaKuca = resultSet.getString(index++);
+			String jezik = resultSet.getString(index++);
+			String kratakOpis = resultSet.getString(index++);
+			String naziv = resultSet.getString(index++);
+			String pismo = resultSet.getString(index++);
 			Double prosecnaOcena = resultSet.getDouble(index++);
 			String slika = resultSet.getString(index++);
 			String tipPoveza = resultSet.getString(index++);
-			String pismo = resultSet.getString(index++);
 
 			Knjiga knjiga = new Knjiga(ISBN, naziv, izdavackaKuca, autor, kratakOpis, jezik, godinaIzdavanja, 
 					brojStranica, cena, prosecnaOcena, slika, tipPoveza, pismo);
@@ -222,7 +222,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		
 		ArrayList<Object> listaArgumenata = new ArrayList<Object>();
 		
-		String sql = "SELECT * FROM knjige k "; 
+		String sql = "SELECT * FROM knjiga k "; 
 		
 		StringBuffer whereSql = new StringBuffer(" WHERE ");
 		boolean imaArgumenata = false;
@@ -262,6 +262,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		}
 		
 		if(autor!=null) {
+			autor = "%" + autor + "%";
 			if(imaArgumenata)
 				whereSql.append(" AND ");
 			whereSql.append("k.autor LIKE ?");
@@ -270,6 +271,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		}
 		
 		if(jezik!=null) {
+			jezik = jezik + "%";
 			if(imaArgumenata)
 				whereSql.append(" AND ");
 			whereSql.append("k.jezik LIKE ?");
@@ -284,7 +286,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 				}
 				else if (sortiranje.equals("poZanru")) {
 					if (zanrId == null) {
-						sql = sql + whereSql.toString()+"ORDER BY (SELECT count(knjigaISBN) FROM knjigazanr WHERE knjigaISBN = k.ISBN)";
+						sql = sql + whereSql.toString()+"ORDER BY (SELECT count(knjiga_ISBN) FROM knjiga_zanr WHERE knjiga_ISBN = k.ISBN)";
 					}
 					else {
 						sql=sql + whereSql.toString()+" ORDER BY k.ISBN";
@@ -300,7 +302,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 					sql = sql + whereSql.toString()+" ORDER BY k.jezik";
 				}
 				else if (sortiranje.equals("poOceni")) {
-					sql = sql + whereSql.toString()+" ORDER BY k.prosecnaOcena";
+					sql = sql + whereSql.toString()+" ORDER BY k.prosecna_ocena";
 				}
 				
 			}
@@ -315,7 +317,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 				}
 				else if (sortiranje.equals("poZanru")) {
 					if (zanrId == null) {
-						sql = sql + "ORDER BY (SELECT count(knjigaISBN) FROM knjigazanr WHERE knjigaISBN = k.ISBN)";
+						sql = sql + "ORDER BY (SELECT count(knjiga_ISBN) FROM knjiga_zanr WHERE knjiga_isbn = k.ISBN)";
 					}
 					else {
 						sql=sql + " ORDER BY k.ISBN";
@@ -331,7 +333,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 					sql = sql + " ORDER BY k.jezik";
 				}
 				else if (sortiranje.equals("poOceni")) {
-					sql = sql + " ORDER BY k.prosecnaOcena";
+					sql = sql + " ORDER BY k.prosecna_ocena";
 				}
 			}
 			else {
@@ -355,7 +357,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		//ako se traži knjiga sa određenim žanrom  
 		// tada se taj žanr mora nalaziti u listi žanrova od knjige
 		if(zanrId!=null)
-			for (Iterator iterator = knjige.iterator(); iterator.hasNext();) {
+			for (Iterator<Knjiga> iterator = knjige.iterator(); iterator.hasNext();) {
 				Knjiga knjiga = (Knjiga) iterator.next();
 				boolean zaBrisanje = true;
 				for (Zanr zanr : knjiga.getZanrovi()) {
@@ -395,7 +397,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		ArrayList<Object> listaArgumenata = new ArrayList<Object>();
 		
 		String sql = 
-				"SELECT kz.knjigaISBN, kz.zanrId FROM knjigaZanr kz ";
+				"SELECT kz.knjiga_ISBN, kz.zanr_id FROM knjiga_zanr kz ";
 		
 		StringBuffer whereSql = new StringBuffer(" WHERE ");
 		boolean imaArgumenata = false;
@@ -403,7 +405,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		if(knjigaISBN!=null) {
 			if(imaArgumenata)
 				whereSql.append(" AND ");
-			whereSql.append("kz.knjigaISBN LIKE ?");
+			whereSql.append("kz.knjiga_ISBN LIKE ?");
 			imaArgumenata = true;
 			listaArgumenata.add(knjigaISBN);
 		}
@@ -411,15 +413,15 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		if(zanrId!=null) {
 			if(imaArgumenata)
 				whereSql.append(" AND ");
-			whereSql.append("kz.zanrId = ?");
+			whereSql.append("kz.zanr_id = ?");
 			imaArgumenata = true;
 			listaArgumenata.add(zanrId);
 		}
 
 		if(imaArgumenata)
-			sql=sql + whereSql.toString()+" ORDER BY kz.knjigaISBN";
+			sql=sql + whereSql.toString()+" ORDER BY kz.knjiga_ISBN";
 		else
-			sql=sql + " ORDER BY kz.knjigaISBN";
+			sql=sql + " ORDER BY kz.knjiga_ISBN";
 		System.out.println(sql);
 		
 		List<Object[]> knjigaZanrovi = jdbcTemplate.query(sql, listaArgumenata.toArray(), new KnjigaZanrRowMapper()); 
@@ -451,7 +453,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				String sql = "INSERT INTO brojPrimeraka VALUES (?,?)";
+				String sql = "INSERT INTO broj_primeraka VALUES (?,?)";
 
 				PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				int index = 1;
@@ -471,7 +473,7 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 	public int updatePrimerke(String ISBN, int brojPrimeraka) {
 		
 		boolean uspeh = true;
-		String sql = "UPDATE brojPrimeraka SET brojKnjiga = ? WHERE knjigaISBN = ?";	
+		String sql = "UPDATE broj_primeraka SET broj_knjiga = ? WHERE knjiga_ISBN = ?";	
 		uspeh = uspeh &&  jdbcTemplate.update(sql, brojPrimeraka, ISBN) == 1;
 		
 		return uspeh?1:0;
@@ -484,12 +486,15 @@ public class KnjigaDAOImpl implements KnjigaDAO {
 		listaArgumenata.add(ISBN);
 		
 		String sql = 
-				"SELECT knjigaISBN, brojKnjiga FROM brojPrimeraka"
-				+ " WHERE knjigaISBN LIKE ? ORDER BY knjigaISBN";
+				"SELECT knjiga_ISBN, broj_knjiga FROM broj_primeraka"
+				+ " WHERE knjiga_ISBN LIKE ? ORDER BY knjiga_ISBN";
 		
-		List<Object[]> primerci = jdbcTemplate.query(sql, listaArgumenata.toArray(), new brojPrimerakaRowMapper()); 
-		
+		List<Object[]> primerci = jdbcTemplate.query(sql, listaArgumenata.toArray(), new brojPrimerakaRowMapper());
+		// ako nikad nije postojao objekat za primerke, tj. knjiga se ne nalazi u sistem
 		int brojPrimeraka = -1;
+		// ako postoji objekat za primerke 
+		if (!primerci.isEmpty()) brojPrimeraka = 0;
+		
 		for (Object[] knjiga : primerci) {
 			if (knjiga[0].equals(ISBN)) {
 				brojPrimeraka = (int)knjiga[1];

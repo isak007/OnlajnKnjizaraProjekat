@@ -27,6 +27,11 @@ public class DatabaseKorisnikService implements KorisnikService {
 	public Korisnik findOne(String korisnickoIme, String lozinka) {
 		return korisnikDAO.findOne(korisnickoIme, lozinka);
 	}
+	
+	@Override
+	public Korisnik findOne(Long korisnikId) {
+		return korisnikDAO.findOne(korisnikId);
+	}
 
 	@Override
 	public List<Korisnik> findAll() {
@@ -135,5 +140,15 @@ public class DatabaseKorisnikService implements KorisnikService {
 		korisnikDAO.deleteZahtevZaLK(korisnickoIme);
 		return korisnickoIme;
 	}
+
+	@Override
+	public void updateListaZelja(Korisnik korisnik, String isbn) {
+		korisnikDAO.updateListaZelja(korisnik, isbn);
+	}
+	
+	public void deleteFromListaZelja(Korisnik korisnik, String isbn) { 
+		korisnikDAO.deleteFromListaZelja(korisnik, isbn);
+	}
+
 	
 }

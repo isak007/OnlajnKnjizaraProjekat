@@ -1,7 +1,9 @@
 package com.ftn.KnjizaraProjekat.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -37,28 +39,46 @@ public class IndexController {
 		Korisnik korisnik = (Korisnik) session.getAttribute(KorisnikController.KORISNIK_KEY);
 		
 		List<Knjiga> sveKnjige = knjigaService.findAll();
-		List<Knjiga> naStanju = new ArrayList<Knjiga>();
-		// provera broja primeraka
-		for (Knjiga k : sveKnjige) {
-			if (knjigaService.findBrPrimeraka(k.getISBN()) > 0) {
-				naStanju.add(k);
-			}
-		}
-		
+		Map<Knjiga, String> knjige = new HashMap<>();
 		List<Zanr> zanrovi = zanrService.findAll();
 		
 		// prosleđivanje
 		ModelAndView rezultat = new ModelAndView("index");
 		if (korisnik != null && korisnik.isAdministrator()) {
-			rezultat.addObject("knjige", sveKnjige);
+			for (Knjiga knjiga: sveKnjige) {
+				knjige.put(knjiga, "NE_LISTA_ZELJA");
+			}
 		}
-		else {
-			rezultat.addObject("knjige", naStanju);
-		}
-		rezultat.addObject("zanrovi", zanrovi);
-
-		return rezultat;
 		
+		else {
+			List<Knjiga> naStanju = new ArrayList<Knjiga>();
+			// provera broja primeraka
+			for (Knjiga k : sveKnjige) {
+				if (knjigaService.findBrPrimeraka(k.getISBN()) > 0) {
+					naStanju.add(k);
+				}
+			}
+			if (korisnik != null && korisnik.getListaZelja() != null && korisnik.getListaZelja().getListaKnjiga() != null) {
+				for (Knjiga knjiga: naStanju) {
+					String uListiZelja = "NE_LISTA_ZELJA";
+					for (Knjiga knjigaIzListeZelja : korisnik.getListaZelja().getListaKnjiga()) {
+						if (knjiga.getISBN().equals(knjigaIzListeZelja.getISBN())) {
+							uListiZelja = "DA_LISTA_ZELJA";
+							break;
+						}
+					}
+					knjige.put(knjiga, uListiZelja);
+				}
+			}
+			else {
+				for (Knjiga knjiga: naStanju) {
+					knjige.put(knjiga, "NE_LISTA_ZELJA");
+				}
+			}
+		}
+		rezultat.addObject("knjige", knjige);			
+		rezultat.addObject("zanrovi", zanrovi);
+		return rezultat;
 	}
 
 }

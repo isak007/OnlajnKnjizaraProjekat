@@ -1,0 +1,204 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-image: url('../images/pozadina.jpg');
+    height: 100vh;
+}
+
+#container{
+    width: 750px;
+    margin: 0 auto;
+}
+
+header{
+    width: 665px;
+    height: 220px;
+    background-image: url('../images/header.jpg');
+    background-size: cover;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    padding: 0px 32px 16px;
+    border-radius: 0 0 10px 10px;
+}
+
+h1{
+    font-family: 'Lobster', cursive;
+    float: left;
+    font-size: 60px;
+    color: white;
+    width: 50%;
+    display: inline-block;
+}
+
+header nav ul{
+    list-style: none;
+    display: inline-block;
+    width: 49%;
+    margin-top: 25px;
+}
+
+header nav ul li{
+    margin-left: 10px;
+    display: inline-block;
+    float: right;
+  	background-color: rgba(0, 0, 0, 0);
+}
+
+header nav ul li a{
+    text-decoration: none;
+    font-family: 'Open Sans Condensed', sans-serif;
+}
+
+header nav ul li a img{
+    width: 45px;
+    height: 45px;
+    background-color: white;
+    padding :  7px;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+
+
+header nav ul li a img:hover{
+    opacity: 1.0;
+}
+
+main{
+	width: 100%;
+	overflow: auto;
+	border-radius: 10px;
+	padding: 10px;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+footer{
+    margin: 10px auto;
+}
+
+footer a{
+    opacity: 0.5;
+}
+
+footer a:hover{
+    opacity: 1.0;
+}
+
+
+main table{
+    overflow: auto;
+	background-color: white;
+	border-radius: 5px;
+	width: 100%;
+	border-style: double;
+}
+
+
+main table .linija{
+    border: 1px solid grey;
+    padding: 0;
+    width: 100%;
+    margin: 5px auto;
+}
+
+#odbij{
+	float: right;
+	margin-right: 25px;
+}
+
+.loyaltyZahtev{
+	text-decoration: none;
+	padding: 0 5px;
+	border-radius: 3px;
+	border: 1px solid black;
+	cursor: pointer;
+	background-color: grey;
+	color: white;
+}
+
+.loyaltyZahtev:hover{
+	background-color: transparent;
+	color: black;
+}
+
+
+main table tr{
+	margin: 10px 15px;
+	padding: 5px;
+	float: left;
+	display: inline-block;
+	width: 100%;
+}
+
+main table th{
+    font-size: 20px;
+	font-family: 'Lobster', cursive;
+	width: 20%;
+	display: inline-block;
+	float: left;
+	text-align: left;
+	margin-left: 5px;
+}
+
+main table td{
+	width: 20%;
+	display: inline-block;
+	float: left;
+	margin-left: 5px;
+}
+
+#pregledKupovine{
+	width:10%;
+}
+
+main table td a{
+	color: black;
+	display: inline-block;
+	float: left;
+}
+
+
+main table td a:hover{
+	color: skyblue;
+}
+
+main h2{
+    color: white;
+    text-align: center;
+    font-family: 'Lobster', cursive;
+    margin: 10px auto;
+}
+
+@media screen and (max-width: 750px) {
+    header {
+        display: none;
+    }
+
+
+    body{
+        background-size: cover;
+    }
+
+    main{
+        width: 90vw;
+        margin: 10px;
+        font-size: 10px;
+    }
+
+    footer a img{
+        width: 20px;
+        height: 20px;
+    }
+
+}
+
+@media screen and (max-width: 290px) {
+    main{
+        font-size: 5px;
+    }
+}

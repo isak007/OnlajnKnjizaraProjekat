@@ -73,32 +73,38 @@
 		
 		<div class="knjige-overflow">
 			<h2>Trenutno u ponudi</h2>
-			<div th:each="itKnjiga, status: ${knjige}">
-				<div class="knjiga">
-					<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|"><img th:src="|@{/}/images/${itKnjiga.slika}|" alt="Knjiga1"/></a>
+			<div th:each="map : ${knjige}">
+				<div class="knjiga" th:each="knjiga : ${map}">
+					<a th:href="|Knjige/Details?isbn=${knjiga.key.ISBN}|"><img th:src="|@{/}/images/${knjiga.key.slika}|" alt="Knjiga1"/></a>
 					<div class="naslov">
-						<strong th:text="${itKnjiga.naziv}"></strong><br>
-						<small th:text="${itKnjiga.autor}"></small>
+						<strong th:text="${knjiga.key.naziv}"></strong><br>
+						<small th:text="${knjiga.key.autor}"></small>
 						<br>
 						<br>
-						<div id="cena"><i>Cena: <span th:text="|${itKnjiga.cena} din|"/></i></div>
+						<div id="cena"><i>Cena: <span th:text="|${knjiga.key.cena} din|"/></i></div>
 					</div>
 					
 					<div class="opis">
-						<textarea th:value="${itKnjiga.kratakOpis}" th:text="${itKnjiga.kratakOpis}" disabled></textarea>
+						<textarea th:value="${knjiga.key.kratakOpis}" th:text="${knjiga.key.kratakOpis}" disabled></textarea>
 					</div>
 					
 					<div class="opcije">
-						<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|" th:text="|Saznaj vise|"></a>
+						<a th:href="|Knjige/Details?isbn=${knjiga.key.ISBN}|" th:text="|Saznaj vise|"></a>
 
 						<form method="post" th:action="@{ListaZelja/Add}"
-						 th:if="${session.prijavljeniKorisnik != null and not session.prijavljeniKorisnik.administrator}">
-						 	<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
+						 th:if="${session.prijavljeniKorisnik != null and not session.prijavljeniKorisnik.administrator and knjiga.value == 'NE_LISTA_ZELJA'}">
+						 	<input type="hidden" name="isbn" th:value=${knjiga.key.ISBN}>
 							<input type="image" name="submit" id="listaZeljaIcon" src="images/listaZelja.png" alt="ukloni"/>
 						</form>
 						
+						<form method="get" th:action="@{ListaZelja/Remove}"
+						 th:if="${session.prijavljeniKorisnik != null and not session.prijavljeniKorisnik.administrator and knjiga.value == 'DA_LISTA_ZELJA'}">
+						 	<input type="hidden" name="isbn" th:value=${knjiga.key.ISBN}>
+							<input type="image" name="submit" id="listaZeljaRemoveIcon" src="images/listaZeljaRemove.png" alt="ukloni"/>
+						</form>
+						
 						<form method="get" th:action="|Korpa/Add|" th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
-							<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
+							<input type="hidden" name="isbn" th:value=${knjiga.key.ISBN}>
 							<button type="submit">Dodaj</button>
 						</form>
 					</div>

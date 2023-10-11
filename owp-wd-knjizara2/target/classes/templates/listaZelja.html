@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/base.html :: layout(~{::title},~{::link},~{::script},~{::centralniDiv})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knjizara Putnik</title>
+    <link rel="stylesheet" href="css/stil.css">
+    <link rel="stylesheet" href="css/tabela.css">
+    <script></script>
+</head>
+
+<body>
+
+	<div th:fragment="centralniDiv">
+		
+		<div class="knjige-overflow">
+			<h2 th:if="${knjige.size() > 0}">Lista želja</h2>
+			<h2 th:unless="${knjige.size() > 0}">Vaša lista želja je prazna</h2>
+			<div th:each="itKnjiga, status: ${knjige}">
+				<div class="knjiga">
+					<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|"><img th:src="|@{/}/images/${itKnjiga.slika}|" alt="Knjiga1"/></a>
+					<div class="naslov">
+						<strong th:text="${itKnjiga.naziv}"></strong><br>
+						<small th:text="${itKnjiga.autor}"></small>
+						<br>
+						<br>
+						<div id="cena"><i>Cena: <span th:text="|${itKnjiga.cena} din|"/></i></div>
+					</div>
+					
+					<div class="opis">
+						<textarea th:value="${itKnjiga.kratakOpis}" th:text="${itKnjiga.kratakOpis}" disabled></textarea>
+					</div>
+					
+					<div class="opcije">
+						<a th:href="|Knjige/Details?isbn=${itKnjiga.ISBN}|" th:text="|Saznaj vise|"></a>
+
+						<form method="get" th:action="@{ListaZelja/Remove}"
+						 th:if="${session.prijavljeniKorisnik != null and not session.prijavljeniKorisnik.administrator}">
+						 	<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
+							<input type="image" name="submit" id="listaZeljaRemoveIcon" src="images/listaZeljaRemove.png" alt="ukloni"/>
+						</form>
+						
+						<form method="get" th:action="|Korpa/Add|" th:unless="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.administrator}">
+							<input type="hidden" name="isbn" th:value=${itKnjiga.ISBN}>
+							<button type="submit">Dodaj</button>
+						</form>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		
+	</div>
+
+	
+</body>
+</html>
+

@@ -18,8 +18,8 @@
 			<h2 th:unless="${knjige.size() > 0}">Vaša korpa je prazna</h2>
 			
 			<div th:if="${knjige.size() > 0}" class="knjige-overflow">
-				<table th:if="${knjige.size() > 0}">
-
+				<table>
+					
 					<tr>
 						<th class="ukloni" th:text="|-|"></th>
 						<th>Broj primeraka</th>
@@ -28,8 +28,8 @@
 						<th>Naziv</th>
 						<th></th>
 					</tr>
+					
 					<tr class="linija"/>
-
 					
 					<th:block th:each="knjiga, status: ${knjige.keySet()}">
 
@@ -43,15 +43,8 @@
 
 							<td>
 								<form method="get" action="Korpa/Update">
-									<input type="hidden" name="knjigaISBN" th:value="${knjiga.ISBN}">		
-									<select id="brojKnjiga" name="brojKnjiga">
-								      <option th:selected="${knjige.get(knjiga) == 1}" value=1>1</option>
-								      <option th:selected="${knjige.get(knjiga) == 2}" value=2>2</option>
-								      <option th:selected="${knjige.get(knjiga) == 3}" value=3>3</option>
-								      <option th:selected="${knjige.get(knjiga) == 4}" value=4>4</option>
-								      <option th:selected="${knjige.get(knjiga) == 5}" value=5>5</option>
-								      <option th:if="${knjige.get(knjiga) > 5}" selected="selected" th:text="${knjige.get(knjiga)}"></option> 
-								    </select>
+									<input type="hidden" name="knjigaISBN" th:value="${knjiga.ISBN}">
+									<input type="number" id="brojKnjiga" name="brojKnjiga" th:value="${knjige.get(knjiga)}" min="1" th:max="${knjigeBrojPrimeraka.get(knjiga.ISBN)}"/>
 								    <a id="update"><button type="submit">Azuriraj</button></a>
 								</form>
 							</td>
@@ -68,7 +61,7 @@
 					<tr>
 						<td id="ukupnaCena" th:text="|Ukupna cena: ${ukupnaCena} din|"/>
 						<td id="loyaltyKartica">
-							<div th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.loyaltyKartica}">
+							<div th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.posedujeLoyaltyKarticu}">
 								<span th:text="|Broj dostupnih poena: ${loyaltyKartica.brojPoena}|"/>
 								<br>
 								<th:block th:if="${loyaltyKartica.brojPoena > 10}">
@@ -85,7 +78,7 @@
 					</tr>
 				</table>
 			</div>
-			<form th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.loyaltyKartica and knjige.size() > 0}"
+			<form th:if="${session.prijavljeniKorisnik != null and session.prijavljeniKorisnik.posedujeLoyaltyKarticu and knjige.size() > 0}"
 			id="azuriranjeForm" method="get" action="Korpa/Update">
 				<button id="azuriraj" type="submit">Azuriraj poene</button>
 			</form>

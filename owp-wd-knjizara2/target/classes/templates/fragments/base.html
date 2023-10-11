@@ -60,6 +60,12 @@
 					<li>
 						<a th:href="|Korisnici/Details?korisnickoIme=${session.prijavljeniKorisnik.korisnickoIme}|" th:if="${session.prijavljeniKorisnik != null}"><img src="images/user.png" alt="Korisnik"/></a>
 					</li>
+					<li>
+						<a th:href="@{/ListaZelja}" th:unless="${session.prijavljeniKorisnik == null or session.prijavljeniKorisnik.administrator}"><img src="images/listaZelja.png" alt="Lista zelja"/></a>
+					</li>
+					<li>
+						<a th:href="@{/Kupovina/Porudzbine}" th:unless="${session.prijavljeniKorisnik == null}"><img src="images/porudzbine.png" alt="Porudzbine"/></a>
+					</li>
 				</ul>
 			</nav>
 		</header>

@@ -4,12 +4,37 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+@Entity
 public class Kupovina {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@Column
 	private double ukupnaCena;
+	
+	@Column
 	private LocalDateTime datumKupovine = LocalDateTime.now();
+	
+	@OneToOne
+	@JoinColumn(name = "kupac_id", nullable = false)
 	private Korisnik kupac;
+	
+	@Column
 	private int brojKupljenihKnjiga;
+	
+	@OneToMany(mappedBy = "kupovina", cascade = CascadeType.ALL)
 	private List<KupljenaKnjiga> listaKupljenihKnjiga = new ArrayList<>();
 	
 	
